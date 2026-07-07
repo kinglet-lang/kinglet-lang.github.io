@@ -13,7 +13,7 @@
     --teal:      #1A6B78;
     --teal-soft: rgba(26,107,120,0.10);
 
-    --serif-sc: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+    --serif: 'Source Serif 4', 'Source Han Serif SC', Georgia, 'Times New Roman', serif;
     --sans:  'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   }
@@ -296,10 +296,11 @@
   }
 
   .hero__meta {
-    margin: 1.1rem 0 0;
+    margin: 0 0 0.7rem;
     font-family: var(--mono);
     font-size: 0.74rem;
-    color: var(--ink-3);
+    font-weight: 500;
+    color: var(--ink-2);
     letter-spacing: 0.01em;
   }
 
@@ -481,7 +482,7 @@
     margin: 0 0 0.75rem;
   }
   .sect__h {
-    font-family: var(--serif-sc);
+    font-family: var(--serif);
     font-weight: 600;
     font-size: clamp(1.6rem, 2.8vw, 2.15rem);
     line-height: 1.3;
@@ -642,7 +643,7 @@
   }
   .guide__sect:first-of-type { border-top: 0; padding-top: 2rem; }
   .guide__sect h2 {
-    font-family: var(--serif-sc);
+    font-family: var(--serif);
     font-weight: 600;
     font-size: clamp(1.4rem, 2.4vw, 1.8rem);
     line-height: 1.32;
