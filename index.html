@@ -382,42 +382,66 @@
   .demo .f { color: #D4B088; }
   .demo .c { color: rgba(255,255,255,0.38); font-style: italic; }
 
-  /* ---------- lexicon (reference chips) ---------- */
-  .lexicon {
+  /* ---------- syntax features (Zig-style bullets) ---------- */
+  .feats {
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .feats li {
+    position: relative;
+    padding-left: 1rem;
+    color: var(--ink-2);
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+  .feats li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--clay);
+    opacity: 0.65;
+  }
+  .feats strong { color: var(--ink); font-weight: 600; }
+  .feats code {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 0.92em;
+    color: var(--ink);
+  }
+
+  /* ---------- grammar reference (flowing mono, no chips) ---------- */
+  .grammar {
     margin-top: 2.25rem;
-    padding-top: 2rem;
     border-top: var(--rule);
+  }
+  .grammar__row {
     display: grid;
-    gap: 1.35rem;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 1.25rem;
+    padding: 0.8rem 0;
+    border-bottom: var(--rule);
+    align-items: baseline;
   }
-  .lexicon__group {
-    display: grid;
-    grid-template-columns: 92px 1fr;
-    gap: 0.5rem 1.25rem;
-    align-items: start;
-  }
-  .lexicon__title {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--clay);
-    margin: 0.28rem 0 0;
-  }
-  .lexicon__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-  .chip {
+  .grammar__label {
     font-family: var(--mono);
     font-size: 0.72rem;
-    line-height: 1.4;
-    padding: 0.18rem 0.48rem;
-    background: var(--paper-2);
-    border: 1px solid var(--rule-c);
-    border-radius: 4px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .grammar__body {
+    font-family: var(--mono);
+    font-size: 0.79rem;
+    line-height: 1.8;
     color: var(--ink-2);
   }
 
@@ -534,7 +558,7 @@
   @media (max-width: 720px) {
     .row { grid-template-columns: 1fr; gap: 0.35rem; }
     .row__go { justify-self: start; margin-top: 0.15rem; }
-    .lexicon__group { grid-template-columns: 1fr; gap: 0.45rem; }
+    .grammar__row { grid-template-columns: 1fr; gap: 0.25rem; }
     .demo__note { display: none; }
     .bar__nav { gap: 1rem; }
     .bar__nav .more { display: none; }
@@ -638,11 +662,15 @@
     <h2 class="sect__h">Familiar, with a few second lives.</h2>
     <p>
       C++-ish at the surface &mdash; braces, value semantics, fixed-width integers.
-      Underneath sit the proposals that didn&rsquo;t make it: <strong>concepts</strong>,
-      <strong>uniform function call</strong>, <strong>tagged enums</strong> with
-      pattern matching, <strong>nullable types</strong> with coalescing, and a
-      <strong>pipe</strong> operator.
+      Underneath, the deferred proposals:
     </p>
+    <ul class="feats">
+      <li><strong>Concepts</strong> &mdash; constrained generics with named requirements.</li>
+      <li><strong>Pattern matching</strong> &mdash; tagged enums and postfix <code>match</code> expressions.</li>
+      <li><strong>Nullable types</strong> &mdash; <code>T?</code>, coalesce <code>?:</code>, unwrap <code>?</code>, and <code>try</code> / <code>catch</code>.</li>
+      <li><strong>Uniform function call</strong> &mdash; <code>x.f()</code> and <code>f(x)</code> interchangeably.</li>
+      <li><strong>Pipe operator</strong> &mdash; <code>|&gt;</code> for left-to-right data flow.</li>
+    </ul>
 
     <div class="demo" id="syntax-demo">
       <div class="demo__bar">
@@ -659,36 +687,18 @@
       </div>
     </div>
 
-    <div class="lexicon">
-      <div class="lexicon__group">
-        <h3 class="lexicon__title">types</h3>
-        <div class="lexicon__chips">
-          <span class="chip">int</span><span class="chip">int8</span><span class="chip">int16</span><span class="chip">int32</span><span class="chip">int64</span>
-          <span class="chip">uint8</span><span class="chip">uint16</span><span class="chip">uint32</span><span class="chip">uint64</span>
-          <span class="chip">float</span><span class="chip">float32</span><span class="chip">float64</span><span class="chip">double</span>
-          <span class="chip">bool</span><span class="chip">string</span><span class="chip">byte</span><span class="chip">char</span><span class="chip">void</span><span class="chip">auto</span>
-        </div>
+    <div class="grammar">
+      <div class="grammar__row">
+        <span class="grammar__label">Types</span>
+        <span class="grammar__body">int &middot; int8 &middot; int16 &middot; int32 &middot; int64 &middot; uint8 &middot; uint16 &middot; uint32 &middot; uint64 &middot; float &middot; float32 &middot; float64 &middot; double &middot; bool &middot; string &middot; byte &middot; char &middot; void &middot; auto</span>
       </div>
-      <div class="lexicon__group">
-        <h3 class="lexicon__title">operators</h3>
-        <div class="lexicon__chips">
-          <span class="chip">+</span><span class="chip">-</span><span class="chip">*</span><span class="chip">/</span><span class="chip">%</span>
-          <span class="chip">==</span><span class="chip">!=</span><span class="chip">&lt;</span><span class="chip">&gt;</span><span class="chip">&lt;=</span><span class="chip">&gt;=</span>
-          <span class="chip">&amp;&amp;</span><span class="chip">||</span><span class="chip">!</span>
-          <span class="chip">&amp;</span><span class="chip">|</span><span class="chip">^</span><span class="chip">~</span><span class="chip">&lt;&lt;</span><span class="chip">&gt;&gt;</span>
-          <span class="chip">|&gt;</span><span class="chip">?:</span><span class="chip">?</span><span class="chip">::</span><span class="chip">=&gt;</span>
-        </div>
+      <div class="grammar__row">
+        <span class="grammar__label">Operators</span>
+        <span class="grammar__body">+ &minus; * / % &middot; == != &lt; &gt; &lt;= &gt;= &middot; &amp;&amp; || ! &middot; &amp; | ^ ~ &lt;&lt; &gt;&gt; &middot; |&gt; &middot; ?: &middot; ? &middot; :: &middot; =&gt;</span>
       </div>
-      <div class="lexicon__group">
-        <h3 class="lexicon__title">keywords</h3>
-        <div class="lexicon__chips">
-          <span class="chip">if</span><span class="chip">else</span><span class="chip">for</span><span class="chip">while</span><span class="chip">guard</span>
-          <span class="chip">match</span><span class="chip">let</span><span class="chip">when</span>
-          <span class="chip">try</span><span class="chip">catch</span>
-          <span class="chip">struct</span><span class="chip">enum</span><span class="chip">concept</span>
-          <span class="chip">using</span><span class="chip">namespace</span><span class="chip">pub</span><span class="chip">import</span><span class="chip">export</span>
-          <span class="chip">const</span><span class="chip">spawn</span><span class="chip">select</span>
-        </div>
+      <div class="grammar__row">
+        <span class="grammar__label">Keywords</span>
+        <span class="grammar__body">if else for while guard &middot; match let when &middot; try catch &middot; struct enum concept &middot; using namespace pub import export &middot; const &middot; spawn select</span>
       </div>
     </div>
 
