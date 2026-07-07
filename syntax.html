@@ -69,8 +69,8 @@
           <code>kinglet hello.kl</code>
         </li>
         <li>
-          <strong>New project</strong> — creates <code>kinglet.nest</code> and
-          <code>src/main.kl</code>:
+          <strong>New project</strong> — run <code>kinglet init</code> and answer two prompts
+          (project name and parent directory), or pass a path:
           <code>kinglet init myapp</code>
         </li>
         <li>
@@ -85,17 +85,36 @@
         </li>
       </ol>
       <div class="snippet">
-        <div class="snippet__cap">terminal</div>
-        <pre>kinglet init demo
-cd demo
-kinglet build
+        <div class="snippet__cap">kinglet init</div>
+        <pre>Create a new Kinglet project
+
+?  Project name (kinglet-app) › demo
+?  Location (.) › ~/Code
+
+✓  Created project demo
+
+   ~/Code/demo/
+   kinglet.nest
+   src/main.kl
+
+   Next steps
+     cd ~/Code/demo
+     kinglet build</pre>
+      </div>
+      <p>
+        Press Enter to accept the defaults (<code>kinglet-app</code> in the current directory).
+        The manifest’s <code>project</code> name is taken from the final directory name.
+        <code>kinglet init myapp</code> skips the prompts and creates <code>./myapp/</code> directly.
+        In a non-interactive shell with no path, it defaults to <code>kinglet-app</code>.
+      </p>
+      <div class="snippet">
+        <div class="snippet__cap">after build</div>
+        <pre>kinglet build
 kinglet run
 ./.kinglet/out/app          # same binary, by path</pre>
       </div>
       <p>
-        <code>kinglet init</code> with no path starts an interactive prompt (project name
-        and location). The project name becomes the last path segment. Native linking needs
-        <code>clang++</code> on your PATH.
+        Native linking needs <code>clang++</code> on your PATH.
       </p>
     </section>
 
@@ -195,7 +214,7 @@ fmt {
         </li>
         <li class="row">
           <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet init [path]</code></span>
-          <span class="row__desc">Scaffold <code>kinglet.nest</code> and <code>src/main.kl</code>. Interactive when run with no path on a TTY.</span>
+          <span class="row__desc">Scaffold <code>kinglet.nest</code> and <code>src/main.kl</code>. Interactive: asks for project name and parent directory. With a path, creates that directory directly.</span>
         </li>
         <li class="row">
           <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet build [target]</code></span>
