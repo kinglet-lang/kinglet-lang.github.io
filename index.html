@@ -378,6 +378,16 @@
     color: var(--ink-3);
     font-size: 0.85rem;
   }
+  .foot__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.4rem;
+    margin-bottom: 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+  }
+  .foot__links a { color: var(--ink-2); border: none; }
+  .foot__links a:hover { color: var(--clay); }
   .foot__inner {
     display: flex;
     align-items: center;
@@ -515,7 +525,7 @@
       <div class="code">
         <div class="code__head">
           <span class="code__file">familiar.kl</span>
-          <span class="code__note">structs, monomorphized generics, expression functions</span>
+          <span class="code__note">generics + expression functions — comments are real output</span>
         </div>
 <pre><span class="k">using</span> io;
 
@@ -527,7 +537,8 @@
 
 <span class="t">int</span> <span class="f">main</span>() {
   <span class="t">Box</span>&lt;<span class="t">int</span>&gt; bi { <span class="n">42</span> };
-  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));
+  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, bi.value);              <span class="c">// &rarr; 42</span>
+  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));  <span class="c">// &rarr; 99</span>
   <span class="k">return</span> <span class="n">0</span>;
 }</pre>
       </div>
@@ -671,10 +682,18 @@
 </main>
 
 <footer class="foot">
-  <div class="wrap foot__inner">
-    <span class="foot__brand">kinglet-lang</span>
-    <span>natively compiled &middot; proposal-inspired</span>
-    <a href="https://github.com/kinglet-lang">github.com/kinglet-lang</a>
+  <div class="wrap">
+    <nav class="foot__links" aria-label="footer">
+      <a href="https://github.com/kinglet-lang/bootstrap#readme">docs</a>
+      <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">examples</a>
+      <a href="https://github.com/kinglet-lang/perch">editor</a>
+      <a href="https://github.com/kinglet-lang/crest">theme</a>
+      <a href="https://github.com/kinglet-lang">github</a>
+    </nav>
+    <div class="foot__inner">
+      <span class="foot__brand">kinglet-lang</span>
+      <span>natively compiled &middot; proposal-inspired</span>
+    </div>
   </div>
 </footer>
 
