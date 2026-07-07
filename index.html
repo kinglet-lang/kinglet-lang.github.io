@@ -8,28 +8,26 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Warm, paper-forward palette — Kinglet's cream belly + amber beak,
-       composed in the register of calm editorial UI. Teal is reserved for
-       the bird and the code "type" color so it never dominates the chrome. */
-    --paper:    #F2EEE3;  /* page background — warm paper */
-    --paper-2:  #EDE7D8;  /* faintly deeper paper for raised surfaces */
-    --surface:  #E8E0CE;  /* terminal / code surface — warm tan */
-    --surface-2:#E2D8C2;  /* deeper surface */
-    --ink:      #2C2823;  /* primary text — warm charcoal */
-    --ink-2:    #6B6052;  /* secondary text — warm grey-brown */
-    --ink-3:    #978A78;  /* meta / tertiary */
-    --rule:     1px solid #D8CFBC;  /* hairlines — warm grey-tan */
-    --rule-c:   #D8CFBC;
-    --clay:     #BE5A2A;  /* primary accent — warm clay (Kinglet beak / Claude-clay bridge) */
-    --clay-2:   #D97441;  /* lighter clay — hover, soft */
-    --teal:     #2F7E88;  /* secondary accent — Kinglet teal, logo + code type only */
+    --paper:     #F4F0E6;
+    --paper-2:   #EBE5D8;
+    --surface:   #1E1C19;
+    --surface-2: #2A2723;
+    --ink:       #1A1814;
+    --ink-2:     #5C5549;
+    --ink-3:     #8A8275;
+    --rule:      1px solid #D5CCBA;
+    --rule-c:    #D5CCBA;
+    --clay:      #C45E28;
+    --clay-2:    #D97441;
+    --teal:      #1A6B78;
+    --teal-soft: rgba(26,107,120,0.10);
 
-    --serif: 'Fraunces', 'Source Serif 4', Georgia, serif;
-    --sans:  'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --mono:  'IBM Plex Mono', ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --sans:  'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   }
 
   *, *::before, *::after { box-sizing: border-box; }
@@ -44,12 +42,12 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  ::selection { background: rgba(190,90,42,0.22); color: var(--ink); }
+  ::selection { background: rgba(196,94,40,0.20); color: var(--ink); }
 
   a {
     color: var(--clay);
     text-decoration: none;
-    border-bottom: 1px solid rgba(190,90,42,0.32);
+    border-bottom: 1px solid rgba(196,94,40,0.30);
     transition: border-color .15s ease, color .15s ease;
   }
   a:hover { color: var(--ink); border-bottom-color: var(--ink); }
@@ -67,7 +65,7 @@
 
   .wrap {
     width: 100%;
-    max-width: 720px;
+    max-width: 740px;
     margin: 0 auto;
     padding: 0 clamp(1rem, 5vw, 1.5rem);
   }
@@ -77,15 +75,15 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(242,238,227,0.86);
-    backdrop-filter: saturate(140%) blur(8px);
+    background: rgba(244,240,230,0.90);
+    backdrop-filter: saturate(140%) blur(10px);
     border-bottom: var(--rule);
   }
   .bar__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 58px;
+    height: 56px;
   }
   .brand {
     display: inline-flex;
@@ -97,14 +95,15 @@
   .brand__name {
     font-family: var(--mono);
     font-weight: 600;
-    font-size: 1.02rem;
-    letter-spacing: -0.01em;
+    font-size: 0.98rem;
+    letter-spacing: -0.02em;
   }
   .brand__name b { color: var(--clay); font-weight: 600; }
 
   .bar__nav { display: flex; align-items: center; gap: 1.5rem; }
   .bar__nav a {
-    font-size: 0.86rem;
+    font-size: 0.84rem;
+    font-weight: 500;
     color: var(--ink-2);
     border: none;
   }
@@ -112,174 +111,198 @@
   .bar__nav .gh {
     display: inline-flex; align-items: center; gap: 0.4rem;
     font-family: var(--mono);
+    font-size: 0.82rem;
   }
   .bar__nav .gh svg { width: 15px; height: 15px; }
 
   /* ---------- hero ---------- */
-  .hero { padding: clamp(3.5rem, 9vw, 6.5rem) clamp(1rem, 5vw, 1.5rem) clamp(2.5rem, 6vw, 4rem); text-align: center; }
+  .hero {
+    padding: clamp(3rem, 8vw, 5.5rem) clamp(1rem, 5vw, 1.5rem) clamp(2rem, 5vw, 3rem);
+    text-align: center;
+  }
   .hero__eyebrow {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
+    font-size: 0.70rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--ink-2);
-    margin: 0 0 1.75rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-  .hero__eyebrow::before {
-    content: "";
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--clay);
-    box-shadow: 0 0 0 3px rgba(190,90,42,0.16);
+    color: var(--ink-3);
+    margin: 0 0 1.5rem;
   }
   .hero__logo {
     display: block;
-    width: min(380px, 72%);
+    width: min(360px, 68%);
     max-width: 100%;
     height: auto;
-    margin: 0 auto 1.75rem;
+    margin: 0 auto 1.5rem;
   }
   .hero__lede {
-    max-width: 52ch;
-    margin: 0 auto 2.5rem;
+    max-width: 50ch;
+    margin: 0 auto 2.75rem;
     font-family: var(--serif);
     font-weight: 400;
-    font-size: clamp(1.15rem, 1.7vw, 1.4rem);
-    line-height: 1.5;
+    font-size: clamp(1.2rem, 1.8vw, 1.45rem);
+    line-height: 1.45;
     color: var(--ink);
   }
   .hero__lede em {
-    color: var(--clay);
+    color: var(--teal);
     font-style: italic;
   }
 
-  /* ---------- install terminal (signature) ---------- */
-  .term {
-    max-width: 100%;
-    margin: 0 auto;
+  /* ---------- install blocks (signature) ---------- */
+  .install {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    text-align: left;
+  }
+  .install__block {
     background: var(--surface);
-    border: var(--rule);
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
     box-shadow:
-      0 1px 2px rgba(60,40,20,0.04),
-      0 22px 50px -38px rgba(60,40,20,0.28);
+      0 1px 0 rgba(255,255,255,0.04) inset,
+      0 12px 40px -24px rgba(20,16,10,0.45);
   }
-  .term__bar {
+  .install__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.45rem 0.5rem 0.45rem 0.6rem;
-    background: rgba(60,40,20,0.03);
-    border-bottom: var(--rule);
+    padding: 0.5rem 0.55rem 0.5rem 0.65rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
-  .term__tabs { display: inline-flex; gap: 0.2rem; }
-  .term__tab {
+  .install__platform {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
     font-family: var(--mono);
-    font-size: 0.78rem;
-    color: var(--ink-2);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    padding: 0.32rem 0.6rem;
-    cursor: pointer;
-    transition: color .15s ease, background .15s ease, border-color .15s ease;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.72);
   }
-  .term__tab svg { width: 13px; height: 13px; opacity: 0.8; }
-  .term__tab:hover { color: var(--ink); }
-  .term__tab[aria-pressed="true"] {
-    color: var(--ink);
-    background: rgba(190,90,42,0.10);
-    border-color: var(--rule-c);
+  .install__platform svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    opacity: 0.85;
   }
-  .term__copy {
+  .install__platform--mac { color: rgba(255,255,255,0.78); }
+  .install__platform--linux { color: rgba(255,255,255,0.72); }
+  .install__platform--win { color: rgba(255,255,255,0.72); }
+
+  .install__arch {
+    margin-left: 0.35rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid rgba(255,255,255,0.12);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(255,255,255,0.38);
+    font-size: 0.68rem;
+  }
+
+  .install__copy {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     font-family: var(--mono);
-    font-size: 0.74rem;
-    color: var(--ink-2);
+    font-size: 0.70rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 6px;
-    padding: 0.32rem 0.6rem;
+    border-radius: 5px;
+    padding: 0.28rem 0.55rem;
     cursor: pointer;
     transition: color .15s ease, border-color .15s ease, background .15s ease;
   }
-  .term__copy svg { width: 13px; height: 13px; }
-  .term__copy:hover { color: var(--ink); border-color: var(--rule-c); }
-  .term__copy.done { color: var(--clay); border-color: rgba(190,90,42,0.4); }
+  .install__copy svg { width: 12px; height: 12px; }
+  .install__copy:hover {
+    color: rgba(255,255,255,0.85);
+    border-color: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+  }
+  .install__copy.done {
+    color: #E8A070;
+    border-color: rgba(232,160,112,0.35);
+  }
 
-  .term__line {
+  .install__line {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 1.1rem 1.1rem;
+    gap: 0.65rem;
+    padding: 0.95rem 1rem;
     font-family: var(--mono);
-    font-size: 0.88rem;
-    background: var(--surface);
+    font-size: 0.82rem;
+    line-height: 1.5;
   }
-  .term__prompt { color: var(--clay); flex: none; user-select: none; font-weight: 600; }
-  .term__cmd {
-    /* override base <code> chip styling — this is terminal text, not an inline pill */
+  .install__prompt {
+    color: var(--clay-2);
+    flex: none;
+    user-select: none;
+    font-weight: 500;
+    opacity: 0.9;
+  }
+  .install__cmd {
     background: none;
     border: 0;
     padding: 0;
     border-radius: 0;
     font-size: inherit;
-    color: var(--ink);
+    font-family: inherit;
+    color: rgba(255,255,255,0.88);
     white-space: nowrap;
     overflow-x: auto;
     flex: 1;
     scrollbar-width: thin;
-    scrollbar-color: var(--rule-c) transparent;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
   }
-  .term__cmd::-webkit-scrollbar { height: 6px; }
-  .term__cmd::-webkit-scrollbar-thumb { background: var(--rule-c); border-radius: 3px; }
-  .term__cursor {
-    color: var(--clay);
-    flex: none;
-    animation: blink 1.05s steps(1) infinite;
+  .install__cmd::-webkit-scrollbar { height: 5px; }
+  .install__cmd::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px;
   }
-  @keyframes blink { 50% { opacity: 0; } }
 
   .hero__meta {
-    margin: 1rem 0 0;
+    margin: 1.1rem 0 0;
     font-family: var(--mono);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     color: var(--ink-3);
     letter-spacing: 0.01em;
   }
-  .hero__meta b { color: var(--ink-2); font-weight: 500; }
 
   /* ---------- code examples (syntax) ---------- */
   .samples { margin-top: 0.5rem; }
   .code {
-    border-left: 2px solid rgba(190,90,42,0.4);
+    border: var(--rule);
+    border-radius: 8px;
     background: var(--paper-2);
-    margin: 1.5rem 0 0;
+    margin: 1.25rem 0 0;
+    overflow: hidden;
   }
   .code__head {
     display: flex;
     align-items: baseline;
+    justify-content: space-between;
     gap: 0.8rem;
-    padding: 0.55rem 1rem 0.4rem;
+    padding: 0.55rem 1rem;
+    background: rgba(60,40,20,0.03);
+    border-bottom: var(--rule);
     font-family: var(--mono);
     flex-wrap: wrap;
   }
-  .code__file { color: var(--ink); font-size: 0.8rem; }
-  .code__note { color: var(--ink-3); font-size: 0.76rem; }
+  .code__file { color: var(--ink); font-size: 0.78rem; font-weight: 500; }
+  .code__note { color: var(--ink-3); font-size: 0.74rem; }
   .code pre {
     margin: 0;
-    padding: 0.2rem 1rem 0.9rem;
+    padding: 0.85rem 1rem 1rem;
     overflow-x: auto;
     font-family: var(--mono);
-    font-size: 0.83rem;
+    font-size: 0.81rem;
     line-height: 1.62;
     color: var(--ink);
     scrollbar-width: thin;
@@ -287,84 +310,94 @@
   }
   .code pre::-webkit-scrollbar { height: 6px; }
   .code pre::-webkit-scrollbar-thumb { background: var(--rule-c); border-radius: 3px; }
-  /* syntax highlighting — warm, tuned for the paper background.
-     Teal survives only as the type color; everything else is clay/ochre/green. */
-  .code .k { color: #9C3A1B; }              /* keyword  — deep clay   */
-  .code .t { color: #1F7A77; }              /* type     — Kinglet teal */
-  .code .s { color: #3F7A2E; }              /* string   — forest green */
-  .code .n { color: #8A5E10; }              /* number   — ochre        */
-  .code .f { color: #7A4A1C; }              /* function — warm brown   */
-  .code .c { color: #978A78; font-style: italic; } /* comment */
+  .code .k { color: #9C3A1B; }
+  .code .t { color: #1A6B78; }
+  .code .s { color: #3A7228; }
+  .code .n { color: #8A5E10; }
+  .code .f { color: #7A4A1C; }
+  .code .c { color: var(--ink-3); font-style: italic; }
 
-  /* ---------- reference rows (types / operators / keywords) ---------- */
+  /* ---------- reference rows ---------- */
   .ref { margin-top: 2rem; border-top: var(--rule); }
   .ref__row {
     display: grid;
-    grid-template-columns: 96px 1fr;
+    grid-template-columns: 100px 1fr;
     gap: 1rem;
-    padding: 0.7rem 0;
+    padding: 0.75rem 0;
     border-bottom: var(--rule);
     font-family: var(--mono);
-    font-size: 0.79rem;
+    font-size: 0.78rem;
     line-height: 1.75;
   }
-  .ref__k { color: var(--clay); }
+  .ref__k {
+    color: var(--clay);
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding-top: 0.15rem;
+  }
   .ref__v { color: var(--ink-2); }
 
   /* ---------- sections ---------- */
-  .sect { padding: clamp(3rem, 7vw, 5rem) clamp(1rem, 5vw, 1.5rem); border-top: var(--rule); }
+  .sect {
+    padding: clamp(2.75rem, 6vw, 4.5rem) clamp(1rem, 5vw, 1.5rem);
+    border-top: var(--rule);
+  }
   .sect__label {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
+    font-size: 0.70rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--clay);
-    margin: 0 0 0.9rem;
+    color: var(--teal);
+    margin: 0 0 0.75rem;
   }
   .sect__h {
     font-family: var(--serif);
-    font-weight: 500;
-    font-size: clamp(1.5rem, 2.8vw, 2.05rem);
-    line-height: 1.14;
-    letter-spacing: -0.02em;
-    margin: 0 0 1.4rem;
+    font-weight: 400;
+    font-size: clamp(1.55rem, 2.8vw, 2.1rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.25rem;
     color: var(--ink);
   }
   .sect p {
-    margin: 0 0 1.1rem;
+    margin: 0 0 1rem;
     color: var(--ink-2);
+    font-size: 0.97rem;
   }
   .sect p strong { color: var(--ink); font-weight: 600; }
-  .sect p + p { margin-top: 0; }
 
-  /* ---------- rows (definition lists, not cards) ---------- */
+  /* ---------- rows ---------- */
   .rows { margin: 0; padding: 0; list-style: none; }
   .row {
     display: grid;
-    grid-template-columns: 180px 1fr auto;
-    gap: 1.5rem;
+    grid-template-columns: 170px 1fr auto;
+    gap: 1.25rem;
     align-items: baseline;
-    padding: 1.25rem 0;
+    padding: 1.15rem 0;
     border-top: var(--rule);
   }
   .row:last-child { border-bottom: var(--rule); }
   .row__name {
     font-family: var(--mono);
-    font-size: 0.95rem;
+    font-size: 0.90rem;
+    font-weight: 500;
     color: var(--ink);
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
   }
-  .row__name .dot { color: var(--clay); }
+  .row__name .dot { color: var(--clay); font-size: 0.7rem; }
   .row__desc {
     color: var(--ink-2);
-    font-size: 0.96rem;
+    font-size: 0.94rem;
     line-height: 1.55;
   }
   .row__go {
     font-family: var(--mono);
-    font-size: 0.82rem;
+    font-size: 0.80rem;
     color: var(--clay);
     border: none;
     white-space: nowrap;
@@ -374,17 +407,17 @@
   /* ---------- footer ---------- */
   .foot {
     border-top: var(--rule);
-    padding: 2.5rem 0 3.5rem;
+    padding: 2.25rem 0 3rem;
     color: var(--ink-3);
-    font-size: 0.85rem;
+    font-size: 0.84rem;
   }
   .foot__links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem 1.4rem;
-    margin-bottom: 1.4rem;
+    gap: 0.3rem 1.3rem;
+    margin-bottom: 1.25rem;
     font-family: var(--mono);
-    font-size: 0.82rem;
+    font-size: 0.80rem;
   }
   .foot__links a { color: var(--ink-2); border: none; }
   .foot__links a:hover { color: var(--clay); }
@@ -408,21 +441,21 @@
     outline-offset: 2px;
     border-radius: 3px;
   }
-  .term__cmd:focus-visible { outline: none; }
 
   /* ---------- responsive ---------- */
   @media (max-width: 720px) {
-    .row { grid-template-columns: 1fr; gap: 0.4rem; }
-    .row__go { justify-self: start; margin-top: 0.2rem; }
-    .ref__row { grid-template-columns: 1fr; gap: 0.15rem; }
-    .bar__nav { gap: 1.1rem; }
+    .row { grid-template-columns: 1fr; gap: 0.35rem; }
+    .row__go { justify-self: start; margin-top: 0.15rem; }
+    .ref__row { grid-template-columns: 1fr; gap: 0.1rem; }
+    .bar__nav { gap: 1rem; }
     .bar__nav .more { display: none; }
+    .install__arch { display: none; }
   }
   @media (max-width: 480px) {
-    .term__line { font-size: 0.78rem; padding: 0.9rem; gap: 0.5rem; }
-    .term__tab span, .term__copy span { display: none; }
-    .code pre { font-size: 0.76rem; }
-    .hero__logo { width: 88%; }
+    .install__line { font-size: 0.74rem; padding: 0.85rem 0.9rem; }
+    .install__copy span { display: none; }
+    .code pre { font-size: 0.75rem; }
+    .hero__logo { width: 84%; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -451,70 +484,104 @@
 
 <main id="top">
 
-  <!-- HERO -->
   <section class="hero wrap">
     <p class="hero__eyebrow">reference compiler &middot; v0 in progress</p>
-    <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="380" height="118">
+    <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="360" height="112">
     <p class="hero__lede">
-      A natively-compiled language exploring the C++ proposals that deserved a
-      <em>second life</em>. Familiar semantics, distilled — proposal-inspired,
+      A natively-compiled language built from the C++ proposals that deserved a
+      <em>second life</em>. Familiar semantics, distilled &mdash; proposal-inspired,
       not proposal-compatible.
     </p>
 
-    <!-- install terminal -->
-    <div class="term" id="install" role="group" aria-label="Install command">
-      <div class="term__bar">
-        <div class="term__tabs" role="group" aria-label="Platform">
-          <button class="term__tab" data-platform="unix" aria-pressed="true">
-            <span>macOS &middot; Linux</span>
-          </button>
-          <button class="term__tab" data-platform="win" aria-pressed="false">
-            <span>Windows</span>
+    <div class="install" id="install" role="group" aria-label="Install commands">
+
+      <div class="install__block" data-platform="macos">
+        <div class="install__head">
+          <span class="install__platform install__platform--mac">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M12.152 2.064c.12-.96.88-1.68 1.76-1.76-.08 1.04-.56 1.84-1.44 2.32-.88.48-1.84.4-2.32-.56zm.48 1.04c1.36-.08 2.4 1.44 2.4 1.44s-2.24 1.2-2.96-.48c-.64-1.52.56-2.96 1.44-3.36-.08 1.04.4 1.84 1.12 2.4zM10.4 4.4C8.72 4.24 7.36 5.36 6.48 5.36c-.96 0-2.16-.88-3.52-.88-1.84 0-3.52 1.12-4.48 2.8-1.92 3.28-.48 8.08 1.36 10.72.92 1.28 2 2.72 3.44 2.64 1.36-.08 1.84-.88 3.44-.88 1.6 0 2 .88 3.44.84 1.44-.04 2.32-1.28 3.2-2.56 1.04-1.44 1.44-2.88 1.48-2.96-.04-.04-2.8-1.08-2.84-4.24-.04-2.68 2.16-3.96 2.28-4.04z"/></svg>
+            macOS
+            <span class="install__arch">arm64</span>
+          </span>
+          <button class="install__copy" type="button" aria-label="Copy macOS install command">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" class="copy-icon"><rect x="4.5" y="4.5" width="8" height="8" rx="1.2"/><path d="M3 11V3.5C3 3.2 3.2 3 3.5 3H11"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" class="check-icon" style="display:none"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>copy</span>
           </button>
         </div>
-        <button class="term__copy" id="copy" type="button" aria-label="Copy install command">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" id="copy-icon"><rect x="4.5" y="4.5" width="8" height="8" rx="1.2"/><path d="M3 11V3.5C3 3.2 3.2 3 3.5 3H11"/></svg>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" id="check-icon" style="display:none"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span id="copy-label">copy</span>
-        </button>
+        <div class="install__line">
+          <span class="install__prompt">$</span>
+          <code class="install__cmd">curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh | sh</code>
+        </div>
       </div>
-      <div class="term__line">
-        <span class="term__prompt" id="prompt">$</span>
-        <code class="term__cmd" id="cmd">curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh | sh</code>
-        <span class="term__cursor" aria-hidden="true">&#9608;</span>
+
+      <div class="install__block" data-platform="linux">
+        <div class="install__head">
+          <span class="install__platform install__platform--linux">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8.08 1.2c-.16.48-.4.88-.72 1.2-.32.32-.72.56-1.2.72.48.16.88.4 1.2.72.32.32.56.72.72 1.2.16-.48.4-.88.72-1.2.32-.32.72-.56 1.2-.72-.48-.16-.88-.4-1.2-.72-.32-.32-.56-.72-.72-1.2zM6 3.6c-.8.24-1.44.72-1.92 1.44-.48.72-.72 1.6-.72 2.64 0 .64.08 1.2.24 1.68-.56.16-1 .48-1.32.96-.32.48-.48 1.04-.48 1.68 0 .72.2 1.36.6 1.92.4.56.96.96 1.68 1.2-.08.4-.12.8-.12 1.2 0 .96.28 1.76.84 2.4.56.64 1.32.96 2.28.96.4 0 .76-.04 1.08-.12.32.56.76 1 1.32 1.32.56.32 1.2.48 1.92.48.8 0 1.48-.2 2.04-.6.56-.4.96-.96 1.2-1.68.32.08.68.12 1.08.12.96 0 1.72-.32 2.28-.96.56-.64.84-1.44.84-2.4 0-.4-.04-.8-.12-1.2.72-.24 1.28-.64 1.68-1.2.4-.56.6-1.2.6-1.92 0-.64-.16-1.2-.48-1.68-.32-.48-.76-.8-1.32-.96.16-.48.24-1.04.24-1.68 0-1.04-.24-1.92-.72-2.64-.48-.72-1.12-1.2-1.92-1.44-.24-.72-.64-1.28-1.2-1.68-.56-.4-1.24-.6-2.04-.6-.8 0-1.48.2-2.04.6-.56.4-.96.96-1.2 1.68z"/></svg>
+            Linux
+            <span class="install__arch">x64</span>
+          </span>
+          <button class="install__copy" type="button" aria-label="Copy Linux install command">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" class="copy-icon"><rect x="4.5" y="4.5" width="8" height="8" rx="1.2"/><path d="M3 11V3.5C3 3.2 3.2 3 3.5 3H11"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" class="check-icon" style="display:none"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>copy</span>
+          </button>
+        </div>
+        <div class="install__line">
+          <span class="install__prompt">$</span>
+          <code class="install__cmd">curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh | sh</code>
+        </div>
       </div>
+
+      <div class="install__block" data-platform="windows">
+        <div class="install__head">
+          <span class="install__platform install__platform--win">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1.5 2.5h5.5v5.5H1.5V2.5zm6.5 0H14v5.5H8V2.5zM1.5 9H8v5.5H1.5V9zm6.5 0H14V14.5H8V9z"/></svg>
+            Windows
+            <span class="install__arch">x64</span>
+          </span>
+          <button class="install__copy" type="button" aria-label="Copy Windows install command">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" class="copy-icon"><rect x="4.5" y="4.5" width="8" height="8" rx="1.2"/><path d="M3 11V3.5C3 3.2 3.2 3 3.5 3H11"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" class="check-icon" style="display:none"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>copy</span>
+          </button>
+        </div>
+        <div class="install__line">
+          <span class="install__prompt">PS&gt;</span>
+          <code class="install__cmd">irm https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.ps1 | iex</code>
+        </div>
+      </div>
+
     </div>
-    <p class="hero__meta"><b>macOS</b> arm64 &nbsp;&middot;&nbsp; <b>Linux</b> x64 &nbsp;&middot;&nbsp; <b>Windows</b> x64 &nbsp;&middot;&nbsp; installs to <code>~/.kinglet</code></p>
+    <p class="hero__meta">Prebuilt binaries for macOS arm64, Linux x64, and Windows x64</p>
   </section>
 
-  <!-- ABOUT -->
   <section class="sect wrap" id="about">
     <p class="sect__label">about</p>
     <h2 class="sect__h">The proposals that didn&rsquo;t make it.</h2>
     <p>
       Kinglet takes the WG21 proposals that C++ <strong>deferred or rejected</strong>
-      and gives them a second life — adapting syntax and semantics wherever
+      and gives them a second life &mdash; adapting syntax and semantics wherever
       adaptation makes the language smaller, clearer, or more coherent. It is
       proposal-inspired, not proposal-compatible.
     </p>
     <p>
       Familiar territory underneath: structs, enums, monomorphized generics,
       pattern matching, and expression functions. The reference compiler is
-      written in C++ — a handwritten lexer and parser, a type checker, a KIR
+      written in C++ &mdash; a handwritten lexer and parser, a type checker, a KIR
       middle-end, and an LLVM native backend.
     </p>
     <p>
-      It is early. The reference compiler is what you install today; a
-      self-hosting native toolchain is the goal.
+      The project is early. The reference compiler is what you install today;
+      a self-hosting native toolchain is the goal.
     </p>
   </section>
 
-  <!-- SYNTAX -->
   <section class="sect wrap" id="syntax">
     <p class="sect__label">syntax</p>
     <h2 class="sect__h">Familiar, with a few second lives.</h2>
     <p>
-      C++-ish at the surface — braces, value semantics, fixed-width integers.
+      C++-ish at the surface &mdash; braces, value semantics, fixed-width integers.
       Underneath sit the proposals that didn&rsquo;t make it: <strong>concepts</strong>,
       <strong>uniform function call</strong>, <strong>tagged enums</strong> with
       pattern matching, <strong>nullable types</strong> with coalescing, and a
@@ -525,7 +592,7 @@
       <div class="code">
         <div class="code__head">
           <span class="code__file">familiar.kl</span>
-          <span class="code__note">generics + expression functions — comments are real output</span>
+          <span class="code__note">generics + expression functions</span>
         </div>
 <pre><span class="k">using</span> io;
 
@@ -621,21 +688,20 @@
       </div>
     </div>
 
-    <p style="margin-top:1.6rem;font-size:0.9rem">
+    <p style="margin-top:1.5rem;font-size:0.9rem;color:var(--ink-2)">
       Every snippet above is lifted from the compiler&rsquo;s
       <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">runnable test suite</a>
       &mdash; nothing invented.
     </p>
   </section>
 
-  <!-- INSTALL DETAILS -->
   <section class="sect wrap">
     <p class="sect__label">install</p>
     <h2 class="sect__h">A few more knobs.</h2>
     <ul class="rows">
       <li class="row">
         <span class="row__name"><span class="dot">&#9656;</span> a specific version</span>
-        <span class="row__desc">Pin a tag, or pull a prerelease the one-liner skips by default.</span>
+        <span class="row__desc">Pin a release tag, or pull a prerelease the one-liner skips by default.</span>
         <code>KINGLET_VERSION=v0.1.0-rc.3</code>
       </li>
       <li class="row">
@@ -645,13 +711,12 @@
       </li>
       <li class="row">
         <span class="row__name"><span class="dot">&#9656;</span> no installer</span>
-        <span class="row__desc">Grab a release archive and add its directory to your PATH.</span>
+        <span class="row__desc">Download a release archive and add its directory to your PATH.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/bootstrap/releases">releases &rarr;</a>
       </li>
     </ul>
   </section>
 
-  <!-- ECOSYSTEM -->
   <section class="sect wrap">
     <p class="sect__label">ecosystem</p>
     <h2 class="sect__h">The four repositories.</h2>
@@ -668,7 +733,7 @@
       </li>
       <li class="row">
         <span class="row__name">perch</span>
-        <span class="row__desc">VS Code extension — <code>.kl</code> highlighting, diagnostics, and a native language server.</span>
+        <span class="row__desc">VS Code extension &mdash; <code>.kl</code> highlighting, diagnostics, and a native language server.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/perch">kinglet-lang/perch &rarr;</a>
       </li>
       <li class="row">
@@ -699,60 +764,35 @@
 
 <script>
 (function () {
-  var tabs = document.querySelectorAll('.term__tab');
-  var promptEl = document.getElementById('prompt');
-  var cmdEl = document.getElementById('cmd');
-  var copyBtn = document.getElementById('copy');
-  var copyLabel = document.getElementById('copy-label');
-  var copyIcon = document.getElementById('copy-icon');
-  var checkIcon = document.getElementById('check-icon');
+  var blocks = document.querySelectorAll('.install__block');
+  var resetTimers = new WeakMap();
 
-  var COMMANDS = {
-    unix: {
-      prompt: '$',
-      cmd: 'curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh | sh'
-    },
-    win: {
-      prompt: 'PS>',
-      cmd: 'irm https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.ps1 | iex'
-    }
-  };
-  var current = 'unix';
+  blocks.forEach(function (block) {
+    var copyBtn = block.querySelector('.install__copy');
+    var cmdEl = block.querySelector('.install__cmd');
+    var copyIcon = copyBtn.querySelector('.copy-icon');
+    var checkIcon = copyBtn.querySelector('.check-icon');
+    var label = copyBtn.querySelector('span');
 
-  function setPlatform(p) {
-    current = p;
-    var c = COMMANDS[p];
-    promptEl.textContent = c.prompt;
-    cmdEl.textContent = c.cmd;
-    tabs.forEach(function (t) {
-      t.setAttribute('aria-pressed', t.dataset.platform === p ? 'true' : 'false');
-    });
-  }
-  tabs.forEach(function (t) {
-    t.addEventListener('click', function () { setPlatform(t.dataset.platform); });
-  });
-
-  var resetTimer = null;
-  copyBtn.addEventListener('click', function () {
-    var text = COMMANDS[current].cmd;
-    function done() {
-      copyLabel.textContent = 'copied';
-      copyBtn.classList.add('done');
-      copyIcon.style.display = 'none';
-      checkIcon.style.display = '';
+    copyBtn.addEventListener('click', function () {
+      var text = cmdEl.textContent;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text);
       }
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(reset, 1800);
-    }
-    function reset() {
-      copyLabel.textContent = 'copy';
-      copyBtn.classList.remove('done');
-      copyIcon.style.display = '';
-      checkIcon.style.display = 'none';
-    }
-    done();
+      label.textContent = 'copied';
+      copyBtn.classList.add('done');
+      copyIcon.style.display = 'none';
+      checkIcon.style.display = '';
+
+      var prev = resetTimers.get(copyBtn);
+      if (prev) clearTimeout(prev);
+      resetTimers.set(copyBtn, setTimeout(function () {
+        label.textContent = 'copy';
+        copyBtn.classList.remove('done');
+        copyIcon.style.display = '';
+        checkIcon.style.display = 'none';
+      }, 1800));
+    });
   });
 })();
 </script>
