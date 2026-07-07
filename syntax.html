@@ -189,9 +189,9 @@ fmt {
 
       <ul class="feats">
         <li><strong>project</strong> — required line: <code>project "name" version "x.y.z"</code></li>
-        <li><strong>target</strong> — <code>kind</code> is <code>binary</code> (default), <code>library</code>, <code>test</code>, or <code>object</code>; <code>sources</code> lists <code>.kl</code> files and/or directories (trailing <code>/</code> globs every <code>*.kl</code> inside); <code>deps</code> lists other targets whose modules become importable</li>
+        <li><strong>target</strong> — <code>kind</code> is <code>binary</code> (default, also spelled <code>executable</code>), <code>library</code>, <code>test</code>, or <code>object</code>; <code>sources</code> lists <code>.kl</code> files and/or directories (trailing <code>/</code> globs every <code>*.kl</code> inside); <code>deps</code> lists other targets whose modules become importable</li>
         <li><strong>build</strong> — <code>default</code> is built by bare <code>kinglet build</code>; <code>out</code> and <code>cache</code> override <code>.kinglet/out</code> and <code>.kinglet/cache</code></li>
-        <li><strong>fmt</strong> — read by <code>kinglet fmt</code>: <code>indent</code>, <code>max_width</code>, <code>newline</code> (<code>"lf"</code>/<code>"crlf"</code>), <code>trailing_comma</code></li>
+        <li><strong>fmt</strong> — read by <code>kinglet fmt</code>: <code>indent</code>, <code>max_width</code>, <code>newline</code> (<code>"lf"</code>/<code>"crlf"</code>), <code>trailing_comma</code>, <code>extensions</code></li>
       </ul>
       <p>
         A <code>binary</code> target must have exactly one source file with
@@ -217,20 +217,20 @@ fmt {
           <span class="row__desc">Scaffold <code>kinglet.nest</code> and <code>src/main.kl</code>. Interactive: asks for project name and parent directory. With a path, creates that directory directly.</span>
         </li>
         <li class="row">
-          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet build [target]</code></span>
-          <span class="row__desc">Build a target from the nearest <code>kinglet.nest</code>. Without a name, builds <code>build.default</code>. Pass <code>--quiet</code> to suppress progress.</span>
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet build [--quiet] [target]</code></span>
+          <span class="row__desc">Build a target from the nearest <code>kinglet.nest</code>. Without a name, builds <code>build.default</code>. <code>--quiet</code> suppresses progress output.</span>
         </li>
         <li class="row">
-          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet run [args…]</code></span>
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet run [&lt;file.kl&gt; | args…]</code></span>
           <span class="row__desc">Run <code>.kinglet/out/&lt;default-target&gt;</code> with optional arguments. <code>kinglet run file.kl</code> compiles and runs that file instead.</span>
         </li>
         <li class="row">
-          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet fmt [paths…]</code></span>
-          <span class="row__desc">Format <code>.kl</code> sources using <code>fmt { … }</code> from the manifest. <code>--check</code> exits non-zero if formatting would change files (for CI).</span>
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet fmt [--check|--write] [paths…]</code></span>
+          <span class="row__desc">Format <code>.kl</code> sources using <code>fmt { … }</code> from the manifest. <code>--check</code> exits non-zero if formatting would change files (for CI); <code>--write</code> is the default when neither flag is given. <code>--stdin</code> formats stdin instead of paths; <code>--config &lt;path&gt;</code> overrides which manifest to read.</span>
         </li>
         <li class="row">
-          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet prune [-n] [--all]</code></span>
-          <span class="row__desc">Remove stale object files from <code>.kinglet/cache</code> whose sources no longer exist. <code>-n</code> is dry-run.</span>
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet prune [--dry-run|-n] [--all] [root]</code></span>
+          <span class="row__desc">Remove stale object files from <code>.kinglet/cache</code> whose sources no longer exist. <code>--dry-run</code>/<code>-n</code> reports without deleting; an optional path targets a project root other than the current directory.</span>
         </li>
       </ul>
 
@@ -240,7 +240,9 @@ fmt {
         <li><strong><code>--check</code></strong> — type-check only, no codegen</li>
         <li><strong><code>--tokens</code> / <code>--ast</code></strong> — dump lexer or parser output</li>
         <li><strong><code>--ir</code></strong> — print KIR (middle-end IR)</li>
-        <li><strong><code>--native &lt;out&gt;</code></strong> — write a native executable (requires LLVM build)</li>
+        <li><strong><code>--native &lt;out&gt;</code></strong> / <strong><code>-o &lt;out&gt;</code></strong> — write a native executable (requires LLVM build)</li>
+        <li><strong><code>-g</code></strong> — emit DWARF debug info alongside <code>--native</code>/<code>-o</code></li>
+        <li><strong><code>--obj-cache &lt;dir&gt;</code></strong> — cache object files for incremental native builds</li>
       </ul>
     </section>
 
@@ -312,6 +314,22 @@ T identity&lt;T&gt;(T x) =&gt; x;              // expression body</pre>
         <code>int main()</code>.
       </p>
 
+      <h3>Control flow &amp; declarations</h3>
+      <p>
+        <code>guard</code> is an early-exit check whose <code>else</code> block must not
+        fall through. Destructuring pulls array elements into named bindings, with
+        <code>...rest</code> capturing everything left over. Comparisons chain
+        mathematically: <code>a &lt; b &lt; c</code> desugars to <code>a &lt; b &amp;&amp; b &lt; c</code>,
+        evaluating the middle operand once.
+      </p>
+      <div class="snippet snippet--plain" data-lang="kl">
+        <pre>guard b != 0 else { return -1; }
+
+auto [a, b, ...rest] = nums;   // array/tuple unpacking
+
+if (0 &lt;= i &lt; n) { ... }        // 0 &lt;= i &amp;&amp; i &lt; n</pre>
+      </div>
+
       <h3>Structs &amp; enums</h3>
       <div class="snippet snippet--plain" data-lang="kl">
         <pre>struct Point { int x; int y; }
@@ -374,12 +392,19 @@ string s = n.to_string();   // uniform function call syntax</pre>
         <pre>int? a = int("123") ?: -1;
 int n = int("bad")?;                  // in T? function: return null on failure
 
+int? x = int(text) ?: let err =&gt; 0;   // binds the CastError as err
+
 try {
   n = int("bad")?;
 } catch (let ex: CastError) {
   n = -99;
 }</pre>
       </div>
+      <p>
+        The binding form of <code>?:</code> requires a fallible cast on the left
+        (like <code>int(...)</code>) and keeps the result nullable, so the target must
+        be <code>T?</code>.
+      </p>
 
       <h3>Built-ins &amp; I/O</h3>
       <p>
@@ -434,7 +459,7 @@ string line = io::in();</pre>
       </div>
       <div class="grammar__row">
         <span class="grammar__label">Keywords</span>
-        <span class="grammar__body">if else for while guard &middot; match let when &middot; try catch &middot; struct enum concept &middot; using namespace pub import export &middot; const &middot; spawn select</span>
+        <span class="grammar__body">if else for while guard break continue return &middot; match let when &middot; try catch &middot; struct enum concept &middot; using namespace pub import export &middot; const &middot; true false null &middot; spawn select</span>
       </div>
     </div>
 
