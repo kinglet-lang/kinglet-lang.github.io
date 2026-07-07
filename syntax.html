@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Syntax — Kinglet</title>
-<meta name="description" content="Kinglet syntax sketch: generics, match, concepts, nullables. Examples from the bootstrap compiler test suite.">
+<meta name="description" content="Kinglet language guide: kinglet init, build, run, kinglet.nest manifests, modules, and .kl syntax with examples.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,23 +30,360 @@
 
 <main>
   <header class="page-head wrap">
-    <p class="sect__label">syntax</p>
-    <h1 class="sect__h">A sketch of the language.</h1>
+    <p class="sect__label">guide</p>
+    <h1 class="sect__h">Language &amp; toolchain.</h1>
     <p>
-      Braces, value types, monomorphized generics, <code>=&gt;</code> expression bodies.
-      The pieces below differ most from everyday C++; everything else is closer to
-      C++ with the rough edges filed down.
+      Kinglet is a C++-like surface with a smaller rule set: value types, monomorphized
+      generics, postfix <code>match</code>, nullable <code>T?</code>, and C++20-style
+      modules. This page walks through the project workflow, the
+      <code>kinglet.nest</code> manifest, the CLI, and the parts of the language that
+      differ most from everyday C++.
     </p>
-    <ul class="feats">
-      <li><strong>Concepts</strong> &mdash; <code>concept Foo&lt;T&gt; { ... }</code> constrains generic calls.</li>
-      <li><strong>Pattern matching</strong> &mdash; tagged <code>enum</code> variants; <code>expr match { ... }</code> postfix syntax.</li>
-      <li><strong>Nullables</strong> &mdash; <code>T?</code> types; <code>?:</code> coalesce; postfix <code>?</code> unwrap; <code>try</code>/<code>catch</code> on failure.</li>
-      <li><strong>Uniform call</strong> &mdash; <code>f(x)</code> and <code>x.f()</code> desugar to the same thing when one fits.</li>
-      <li><strong>Pipe</strong> &mdash; <code>x |&gt; f</code> passes <code>x</code> as the first argument to <code>f</code>.</li>
-    </ul>
   </header>
 
   <div class="page-body wrap">
+
+    <nav class="guide__toc" aria-label="On this page">
+      <p class="guide__toc-label">On this page</p>
+      <ul>
+        <li><a href="#start">Quick start</a></li>
+        <li><a href="#nest">kinglet.nest</a></li>
+        <li><a href="#toolchain">CLI</a></li>
+        <li><a href="#modules">Modules</a></li>
+        <li><a href="#language">Language</a></li>
+        <li><a href="#examples">Examples</a></li>
+        <li><a href="#reference">Reference</a></li>
+      </ul>
+    </nav>
+
+    <section class="guide__sect" id="start">
+      <h2>Quick start</h2>
+      <p>
+        After installing <code>kinglet</code> from the <a href="/">homepage</a>, you can
+        compile a single file immediately or scaffold a project. Projects are driven by
+        a <code>kinglet.nest</code> manifest at the root.
+      </p>
+      <ol class="steps">
+        <li>
+          <strong>One-off file</strong> — compile and run without a manifest:
+          <code>kinglet hello.kl</code>
+        </li>
+        <li>
+          <strong>New project</strong> — creates <code>kinglet.nest</code> and
+          <code>src/main.kl</code>:
+          <code>kinglet init myapp</code>
+        </li>
+        <li>
+          <strong>Build</strong> — compiles the default target to
+          <code>.kinglet/out/&lt;target&gt;</code>:
+          <code>kinglet build</code>
+        </li>
+        <li>
+          <strong>Run</strong> — executes the built binary (pass args after
+          <code>run</code>):
+          <code>kinglet run</code>
+        </li>
+      </ol>
+      <div class="snippet">
+        <div class="snippet__cap">terminal</div>
+        <pre>kinglet init demo
+cd demo
+kinglet build
+kinglet run
+./.kinglet/out/app          # same binary, by path</pre>
+      </div>
+      <p>
+        <code>kinglet init</code> with no path starts an interactive prompt (project name
+        and location). The project name becomes the last path segment. Native linking needs
+        <code>clang++</code> on your PATH.
+      </p>
+    </section>
+
+    <section class="guide__sect" id="nest">
+      <h2>kinglet.nest</h2>
+      <p>
+        Every multi-file project has a <code>kinglet.nest</code> at its root. The manifest
+        declares <strong>build targets</strong> (what to compile and link) and formatter
+        settings. Module names live in <code>.kl</code> source files themselves — the
+        manifest does not map names to paths.
+      </p>
+
+      <h3>What init creates</h3>
+      <div class="snippet">
+        <div class="snippet__cap">kinglet.nest</div>
+        <pre>project "demo" version "0.1.0"
+
+target app {
+  kind    = "binary"
+  sources = ["src/"]
+}
+
+build {
+  default = "app"
+  cache   = ".kinglet/cache"
+  out     = ".kinglet/out"
+}</pre>
+      </div>
+      <div class="snippet">
+        <div class="snippet__cap">src/main.kl</div>
+        <pre>export module app;
+using io;
+
+int main() {
+  io::out.line("Hello from demo!");
+  return 0;
+}</pre>
+      </div>
+
+      <h3>Full manifest</h3>
+      <p>A larger project can define multiple targets, directory globs, and dependencies:</p>
+      <div class="snippet">
+        <div class="snippet__cap">kinglet.nest</div>
+        <pre>project "myapp" version "0.1.0"
+
+target calc {
+  kind    = "binary"
+  sources = [
+    "src/calc.kl",
+    "math/",
+    "geo/",
+    "utils/config.kl",
+  ]
+}
+
+target app {
+  kind    = "binary"
+  sources = ["src/app.kl", "math/"]
+}
+
+build {
+  default = "calc"
+  out     = ".kinglet/out"
+  cache   = ".kinglet/cache"
+}
+
+fmt {
+  indent    = 2
+  max_width = 80
+}</pre>
+      </div>
+
+      <ul class="feats">
+        <li><strong>project</strong> — required line: <code>project "name" version "x.y.z"</code></li>
+        <li><strong>target</strong> — <code>kind</code> is <code>binary</code> (default), <code>library</code>, <code>test</code>, or <code>object</code>; <code>sources</code> lists <code>.kl</code> files and/or directories (trailing <code>/</code> globs every <code>*.kl</code> inside); <code>deps</code> lists other targets whose modules become importable</li>
+        <li><strong>build</strong> — <code>default</code> is built by bare <code>kinglet build</code>; <code>out</code> and <code>cache</code> override <code>.kinglet/out</code> and <code>.kinglet/cache</code></li>
+        <li><strong>fmt</strong> — read by <code>kinglet fmt</code>: <code>indent</code>, <code>max_width</code>, <code>newline</code> (<code>"lf"</code>/<code>"crlf"</code>), <code>trailing_comma</code></li>
+      </ul>
+      <p>
+        A <code>binary</code> target must have exactly one source file with
+        <code>int main()</code>; the compiler finds the entry automatically. The output
+        executable is named after the target: <code>.kinglet/out/calc</code>.
+      </p>
+    </section>
+
+    <section class="guide__sect" id="toolchain">
+      <h2>CLI</h2>
+      <p>
+        The release ships one <code>kinglet</code> binary. <code>klet</code> is a hard link
+        to the same file — <code>klet build</code> and <code>kinglet build</code> are
+        identical.
+      </p>
+      <ul class="rows">
+        <li class="row">
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet &lt;file.kl&gt;</code></span>
+          <span class="row__desc">Compile and run a single source file (no manifest needed).</span>
+        </li>
+        <li class="row">
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet init [path]</code></span>
+          <span class="row__desc">Scaffold <code>kinglet.nest</code> and <code>src/main.kl</code>. Interactive when run with no path on a TTY.</span>
+        </li>
+        <li class="row">
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet build [target]</code></span>
+          <span class="row__desc">Build a target from the nearest <code>kinglet.nest</code>. Without a name, builds <code>build.default</code>. Pass <code>--quiet</code> to suppress progress.</span>
+        </li>
+        <li class="row">
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet run [args…]</code></span>
+          <span class="row__desc">Run <code>.kinglet/out/&lt;default-target&gt;</code> with optional arguments. <code>kinglet run file.kl</code> compiles and runs that file instead.</span>
+        </li>
+        <li class="row">
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet fmt [paths…]</code></span>
+          <span class="row__desc">Format <code>.kl</code> sources using <code>fmt { … }</code> from the manifest. <code>--check</code> exits non-zero if formatting would change files (for CI).</span>
+        </li>
+        <li class="row">
+          <span class="row__name"><span class="dot">&#9656;</span> <code>kinglet prune [-n] [--all]</code></span>
+          <span class="row__desc">Remove stale object files from <code>.kinglet/cache</code> whose sources no longer exist. <code>-n</code> is dry-run.</span>
+        </li>
+      </ul>
+
+      <h3>Compiler flags</h3>
+      <p>When invoking <code>kinglet</code> on a <code>.kl</code> file directly, these modes apply:</p>
+      <ul class="feats">
+        <li><strong><code>--check</code></strong> — type-check only, no codegen</li>
+        <li><strong><code>--tokens</code> / <code>--ast</code></strong> — dump lexer or parser output</li>
+        <li><strong><code>--ir</code></strong> — print KIR (middle-end IR)</li>
+        <li><strong><code>--native &lt;out&gt;</code></strong> — write a native executable (requires LLVM build)</li>
+      </ul>
+    </section>
+
+    <section class="guide__sect" id="modules">
+      <h2>Modules</h2>
+      <p>
+        Kinglet uses C++20-modules-style identity: each file declares
+        <code>export module name;</code> and other files <code>import</code> by logical name,
+        not file path. The compiler resolves imports against the current target's
+        <code>sources</code> plus <code>deps</code>.
+      </p>
+      <div class="snippet">
+        <div class="snippet__cap">math/basic.kl</div>
+        <pre>export module math.basic;
+
+pub int square(int x) { return x * x; }</pre>
+      </div>
+      <div class="snippet">
+        <div class="snippet__cap">src/app.kl</div>
+        <pre>export module app;
+using io;
+import math;            // group: every module named math.*
+import geo.point;       // exact: just geo.point
+
+int main() {
+  io::out.line("{}", math::basic::square(4));
+  return 0;
+}</pre>
+      </div>
+      <ul class="feats">
+        <li><strong>Exact import</strong> — <code>import math.basic;</code> loads the file that exports <code>module math.basic</code></li>
+        <li><strong>Group import</strong> — <code>import math;</code> pulls every module whose name starts with <code>math.</code>; call via <code>math::basic::square</code></li>
+        <li><strong>Runtime namespaces</strong> — <code>io</code>, <code>fs</code>, <code>sys</code>, <code>rt</code> are built in; open with <code>using io;</code>, never <code>import</code></li>
+        <li><strong>Using</strong> — <code>using namespace math.basic;</code> or <code>using alias = math.basic;</code></li>
+      </ul>
+      <p>
+        Listing <code>"math/"</code> in <code>sources</code> only adds <code>.kl</code> files
+        from that directory — it does not impose a namespace. Each file still declares its
+        own <code>export module</code>.
+      </p>
+    </section>
+
+    <section class="guide__sect" id="language">
+      <h2>Language</h2>
+      <p>
+        Most everyday syntax is familiar C++: braces, semicolons, <code>for</code>/<code>while</code>,
+        <code>if</code>/<code>else</code>. There is no <code>++</code>/<code>--</code> (write
+        <code>i = i + 1</code>), no <code>switch</code> (use <code>match</code>), and
+        <code>when</code>/<code>spawn</code>/<code>select</code> are reserved but not implemented yet.
+      </p>
+
+      <h3>Types</h3>
+      <p>
+        Primitives: <code>int</code>, sized integers (<code>int32</code>, <code>uint64</code>, …),
+        <code>float</code>/<code>float32</code>/<code>float64</code>, <code>bool</code>,
+        <code>string</code>, <code>void</code>, <code>byte</code>, <code>char</code>.
+        Suffix forms: <code>int[]</code>, <code>{string: int}</code> maps,
+        <code>T?</code> nullables, <code>&amp;T</code> / <code>&amp;mut T</code> references,
+        <code>Box&lt;int&gt;</code> generics.
+      </p>
+
+      <h3>Functions</h3>
+      <div class="snippet snippet--plain">
+        <pre>int add(int a, int b) { return a + b; }
+T identity&lt;T&gt;(T x) =&gt; x;              // expression body</pre>
+      </div>
+      <p>
+        Generic functions monomorphize at compile time. The entry point for binaries is always
+        <code>int main()</code>.
+      </p>
+
+      <h3>Structs &amp; enums</h3>
+      <div class="snippet snippet--plain">
+        <pre>struct Point { int x; int y; }
+Point p { 3, 4 };                     // struct literal
+
+enum Shape {
+  Circle(float),
+  Rect(float, float),
+  None,
+}</pre>
+      </div>
+      <p>
+        Enum variants can carry typed payloads. Trailing commas are allowed. Use
+        <code>pub</code> on declarations you want visible outside the module.
+      </p>
+
+      <h3>Pattern matching</h3>
+      <p>
+        <code>match</code> is postfix: <code>value match { arms }</code>. Arms are
+        <code>pattern =&gt; expr</code>, comma-separated. The checker enforces exhaustiveness
+        on enum and nullable subjects.
+      </p>
+      <div class="snippet snippet--plain">
+        <pre>return s match {
+  Shape::Circle(let r)     =&gt; 3.14 * r * r,
+  Shape::Rect(let w, let h) =&gt; w * h,
+  Shape::None              =&gt; 0.0,
+};</pre>
+      </div>
+      <p>
+        Patterns include <code>_</code>, <code>let x</code>, literals, enum destructuring,
+        array <code>[let a, let b]</code>, and struct <code>Point { let x, let y }</code>.
+        Guards: <code>let x if (x &gt;= 90) =&gt; …</code>.
+      </p>
+
+      <h3>Concepts</h3>
+      <p>
+        Concepts constrain generic code (like traits/interfaces). At least one type parameter
+        is required; method signatures need explicit return types.
+      </p>
+      <div class="snippet snippet--plain">
+        <pre>concept Printable&lt;T&gt; {
+  string to_string(T value);
+}
+
+string s = n.to_string();   // uniform function call syntax</pre>
+      </div>
+      <p>
+        <code>f(x)</code> and <code>x.f()</code> desugar to the same call when one form fits.
+        The pipe operator <code>x |&gt; f</code> passes <code>x</code> as the first argument.
+      </p>
+
+      <h3>Errors &amp; nullables</h3>
+      <p>
+        <code>T?</code> is a nullable type. Postfix <code>?</code> unwraps or propagates failure;
+        <code>?:</code> is Elvis/coalesce; <code>try</code>/<code>catch</code> handles errors
+        in a block.
+      </p>
+      <div class="snippet snippet--plain">
+        <pre>int? a = int("123") ?: -1;
+int n = int("bad")?;                  // in T? function: return null on failure
+
+try {
+  n = int("bad")?;
+} catch (let ex: CastError) {
+  n = -99;
+}</pre>
+      </div>
+
+      <h3>Built-ins &amp; I/O</h3>
+      <p>
+        <code>string</code>, <code>array</code>, and <code>map</code> have methods like
+        <code>len()</code>, <code>push</code>, <code>contains</code> — no import needed.
+        After <code>using io;</code>:
+      </p>
+      <div class="snippet snippet--plain">
+        <pre>io::out("{} {}\n", a, b);
+io::out.line("x={}", v);
+string line = io::in();</pre>
+      </div>
+    </section>
+
+    <section class="guide__sect" id="examples">
+      <h2>Runnable examples</h2>
+      <p>
+        These snippets come from
+        <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">bootstrap/tests/exec/cases</a>
+        and run under CI. Switch tabs to see different features.
+      </p>
+    </section>
+
     <div class="demo" id="syntax-demo">
       <div class="demo__bar">
         <div class="demo__tabs" role="tablist" aria-label="Code examples">
@@ -61,6 +398,11 @@
         <pre id="sample-code"></pre>
       </div>
     </div>
+
+    <section class="guide__sect" id="reference">
+      <h2>Quick reference</h2>
+      <p>Lexer-level tokens recognized today. For the full grammar and semantics, see the bootstrap docs.</p>
+    </section>
 
     <div class="grammar">
       <div class="grammar__row">
@@ -78,10 +420,12 @@
     </div>
 
     <p class="syntax__foot">
-      Snippets are copied from
-      <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">bootstrap/tests/exec/cases</a>
-      and run under CI. For the full grammar and semantics, see the
-      <a href="https://github.com/kinglet-lang/bootstrap#readme">bootstrap README</a>.
+      Full syntax reference:
+      <a href="https://github.com/kinglet-lang/bootstrap/blob/canon/docs/SYNTAX.md">docs/SYNTAX.md</a>
+      &middot; modules &amp; manifest:
+      <a href="https://github.com/kinglet-lang/bootstrap/blob/canon/docs/MODULES.md">docs/MODULES.md</a>
+      &middot; more examples:
+      <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">tests/exec/cases</a>
     </p>
   </div>
 </main>
@@ -108,11 +452,11 @@
   var SAMPLES = {
     familiar: {
       note: 'generics + expression functions',
-      code: '<span class="k">using</span> io;\n\n<span class="k">struct</span> <span class="t">Box</span>&lt;<span class="t">T</span>&gt; {\n  <span class="t">T</span> value;\n}\n\n<span class="t">T</span> <span class="f">identity</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> x) =&gt; x;\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">Box</span>&lt;<span class="t">int</span>&gt; bi { <span class="n">42</span> };\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, bi.value);              <span class="c">// &rarr; 42</span>\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));  <span class="c">// &rarr; 99</span>\n  <span class="k">return</span> <span class="n">0</span>;\n}'
+      code: '<span class="k">using</span> io;\n\n<span class="k">struct</span> <span class="t">Box</span>&lt;<span class="t">T</span>&gt; {\n  <span class="t">T</span> value;\n}\n\n<span class="t">T</span> <span class="f">identity</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> x) =&gt; x;\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">Box</span>&lt;<span class="t">int</span>&gt; bi { <span class="n">42</span> };\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, bi.value);                          <span class="c">// &rarr; 42</span>\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));                  <span class="c">// &rarr; 99</span>\n  <span class="k">return</span> <span class="n">0</span>;\n}'
     },
     match: {
       note: 'tagged enums + postfix pattern matching (P2688-style)',
-      code: '<span class="k">enum</span> <span class="t">Shape</span> {\n  <span class="t">Circle</span>(<span class="t">float</span>),\n  <span class="t">Rect</span>(<span class="t">float</span>, <span class="t">float</span>),\n  <span class="t">None</span>,\n}\n\n<span class="t">float</span> <span class="f">area</span>(<span class="t">Shape</span> s) {\n  <span class="k">return</span> s <span class="k">match</span> {\n    <span class="t">Shape</span>::<span class="t">Circle</span>(<span class="k">let</span> r)      =&gt; <span class="n">3.14</span> * r * r,\n    <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="k">let</span> w, <span class="k">let</span> h) =&gt; w * h,\n    <span class="t">Shape</span>::<span class="t">None</span>               =&gt; <span class="n">0.0</span>,\n  };\n}'
+      code: '<span class="k">enum</span> <span class="t">Shape</span> {\n  <span class="t">Circle</span>(<span class="t">float</span>),\n  <span class="t">Rect</span>(<span class="t">float</span>, <span class="t">float</span>),\n  <span class="t">None</span>,\n}\n\n<span class="t">float</span> <span class="f">area</span>(<span class="t">Shape</span> s) {\n  <span class="k">return</span> s <span class="k">match</span> {\n    <span class="t">Shape</span>::<span class="t">Circle</span>(<span class="k">let</span> r)            =&gt; <span class="n">3.14</span> * r * r,\n    <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="k">let</span> w, <span class="k">let</span> h)        =&gt; w * h,\n    <span class="t">Shape</span>::<span class="t">None</span>                     =&gt; <span class="n">0.0</span>,\n  };\n}'
     },
     concepts: {
       note: 'concepts + uniform function call syntax',
