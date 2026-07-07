@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Syntax — Kinglet</title>
-<meta name="description" content="Kinglet language syntax: concepts, pattern matching, nullable types, and runnable code examples from the compiler test suite.">
+<meta name="description" content="Kinglet syntax sketch: generics, match, concepts, nullables. Examples from the bootstrap compiler test suite.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,17 +32,18 @@
 <main>
   <header class="page-head wrap">
     <p class="sect__label">syntax</p>
-    <h1 class="sect__h">Familiar, with a few second lives.</h1>
+    <h1 class="sect__h">A sketch of the language.</h1>
     <p>
-      C++-ish at the surface &mdash; braces, value semantics, fixed-width integers.
-      Underneath, the deferred proposals:
+      Braces, value types, monomorphized generics, <code>=&gt;</code> expression bodies.
+      The pieces below differ most from everyday C++; everything else is closer to
+      C++ with the rough edges filed down.
     </p>
     <ul class="feats">
-      <li><strong>Concepts</strong> &mdash; constrained generics with named requirements.</li>
-      <li><strong>Pattern matching</strong> &mdash; tagged enums and postfix <code>match</code> expressions.</li>
-      <li><strong>Nullable types</strong> &mdash; <code>T?</code>, coalesce <code>?:</code>, unwrap <code>?</code>, and <code>try</code> / <code>catch</code>.</li>
-      <li><strong>Uniform function call</strong> &mdash; <code>x.f()</code> and <code>f(x)</code> interchangeably.</li>
-      <li><strong>Pipe operator</strong> &mdash; <code>|&gt;</code> for left-to-right data flow.</li>
+      <li><strong>Concepts</strong> &mdash; <code>concept Foo&lt;T&gt; { ... }</code> constrains generic calls.</li>
+      <li><strong>Pattern matching</strong> &mdash; tagged <code>enum</code> variants; <code>expr match { ... }</code> postfix syntax.</li>
+      <li><strong>Nullables</strong> &mdash; <code>T?</code> types; <code>?:</code> coalesce; postfix <code>?</code> unwrap; <code>try</code>/<code>catch</code> on failure.</li>
+      <li><strong>Uniform call</strong> &mdash; <code>f(x)</code> and <code>x.f()</code> desugar to the same thing when one fits.</li>
+      <li><strong>Pipe</strong> &mdash; <code>x |&gt; f</code> passes <code>x</code> as the first argument to <code>f</code>.</li>
     </ul>
   </header>
 
@@ -78,9 +79,10 @@
     </div>
 
     <p class="syntax__foot">
-      Every snippet above is lifted from the compiler&rsquo;s
-      <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">runnable test suite</a>
-      &mdash; nothing invented.
+      Snippets are copied from
+      <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">bootstrap/tests/exec/cases</a>
+      and run under CI. For the full grammar and semantics, see the
+      <a href="https://github.com/kinglet-lang/bootstrap#readme">bootstrap README</a>.
     </p>
   </div>
 </main>
@@ -97,7 +99,7 @@
     </nav>
     <div class="foot__inner">
       <span class="foot__brand">kinglet-lang</span>
-      <span>natively compiled &middot; proposal-inspired</span>
+      <span>bootstrap compiler &middot; LLVM &middot; pre-1.0</span>
     </div>
   </div>
 </footer>

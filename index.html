@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kinglet — natively compiled, proposal-inspired</title>
-<meta name="description" content="Kinglet is a natively-compiled language exploring the C++ proposals that deserved a second life. Install the reference compiler in one command.">
+<title>Kinglet — a C++-ish language with an LLVM compiler</title>
+<meta name="description" content="Kinglet compiles .kl to native code via LLVM. Bootstrap compiler in C++, prebuilt for macOS, Linux, and Windows. Early stage — not production-ready.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,12 +33,13 @@
 
 
   <section class="hero wrap">
-    <p class="hero__eyebrow">reference compiler &middot; v0 in progress</p>
+    <p class="hero__eyebrow">bootstrap compiler &middot; pre-1.0</p>
     <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="360" height="112">
     <p class="hero__lede">
-      A natively-compiled language built from the C++ proposals that deserved a
-      <em>second life</em>. Familiar semantics, distilled &mdash; proposal-inspired,
-      not proposal-compatible.
+      Kinglet compiles <code>.kl</code> to native binaries through LLVM.
+      The surface syntax is C++-like; several deferred WG21 ideas &mdash; concepts,
+      pattern matching, nullable types &mdash; are in, with deliberate simplifications.
+      Not compatible with C++.
     </p>
 
     <div class="term" id="install" role="group" aria-label="Install command">
@@ -73,69 +74,72 @@
 
   <section class="sect wrap" id="about">
     <p class="sect__label">about</p>
-    <h2 class="sect__h">The proposals that didn&rsquo;t make it.</h2>
+    <h2 class="sect__h">What ships today.</h2>
     <p>
-      Kinglet takes the WG21 proposals that C++ <strong>deferred or rejected</strong>
-      and gives them a second life &mdash; adapting syntax and semantics wherever
-      adaptation makes the language smaller, clearer, or more coherent. It is
-      proposal-inspired, not proposal-compatible.
+      Kinglet is an experimental language. The toolchain you can install is a
+      <strong>C++ bootstrap compiler</strong> (<code>kinglet</code> / <code>klet</code>)
+      that lexes, parses, type-checks, lowers to KIR, and emits LLVM object code.
+      There is no package manager, no stable stdlib guarantee, and no self-hosted
+      compiler yet.
     </p>
     <p>
-      Familiar territory underneath: structs, enums, monomorphized generics,
-      pattern matching, and expression functions. The reference compiler is
-      written in C++ &mdash; a handwritten lexer and parser, a type checker, a KIR
-      middle-end, and an LLVM native backend.
+      Language work pulls from WG21 papers that were deferred or dropped &mdash;
+      concepts, tagged enums with <code>match</code>, uniform function call,
+      <code>T?</code> nullables &mdash; but syntax and semantics are trimmed to fit
+      a smaller whole. Details and examples are on the
+      <a href="/syntax.html">syntax page</a>.
     </p>
     <p>
-      The project is early. The reference compiler is what you install today;
-      a self-hosting native toolchain is the goal.
+      If you try it, expect compiler bugs and breaking changes between tags.
+      Bug reports and PRs go to
+      <a href="https://github.com/kinglet-lang/bootstrap">bootstrap</a>.
     </p>
   </section>
 
   <section class="sect wrap">
     <p class="sect__label">install</p>
-    <h2 class="sect__h">A few more knobs.</h2>
+    <h2 class="sect__h">Beyond the one-liner.</h2>
     <ul class="rows">
       <li class="row">
-        <span class="row__name"><span class="dot">&#9656;</span> a specific version</span>
-        <span class="row__desc">Pin a release tag, or pull a prerelease the one-liner skips by default.</span>
+        <span class="row__name"><span class="dot">&#9656;</span> pin a version</span>
+        <span class="row__desc">Set before running the install script. Stable tags only; prereleases are skipped unless you ask.</span>
         <code>KINGLET_VERSION=v0.1.0-rc.3</code>
       </li>
       <li class="row">
-        <span class="row__name"><span class="dot">&#9656;</span> verify it</span>
-        <span class="row__desc"><code>kinglet</code> lands on your PATH. <code>klet</code> is a hard link to the same binary.</span>
+        <span class="row__name"><span class="dot">&#9656;</span> check the binary</span>
+        <span class="row__desc">Install puts <code>kinglet</code> on your PATH. <code>klet</code> is the same executable.</span>
         <code>kinglet --version</code>
       </li>
       <li class="row">
-        <span class="row__name"><span class="dot">&#9656;</span> no installer</span>
-        <span class="row__desc">Download a release archive and add its directory to your PATH.</span>
+        <span class="row__name"><span class="dot">&#9656;</span> manual install</span>
+        <span class="row__desc">Download a release tarball and add the directory to <code>PATH</code> yourself.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/bootstrap/releases">releases &rarr;</a>
       </li>
     </ul>
   </section>
 
   <section class="sect wrap">
-    <p class="sect__label">ecosystem</p>
-    <h2 class="sect__h">The four repositories.</h2>
+    <p class="sect__label">repos</p>
+    <h2 class="sect__h">Where the code lives.</h2>
     <ul class="rows">
       <li class="row">
         <span class="row__name">kinglet</span>
-        <span class="row__desc">Language design, architecture decisions, and the self-hosting effort.</span>
+        <span class="row__desc">Language spec notes and the (future) self-hosted compiler.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/kinglet">kinglet-lang/kinglet &rarr;</a>
       </li>
       <li class="row">
         <span class="row__name">bootstrap</span>
-        <span class="row__desc">The C++ reference compiler. This is the binary on your PATH.</span>
+        <span class="row__desc">The C++ compiler you install. Releases, tests, and install scripts.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/bootstrap">kinglet-lang/bootstrap &rarr;</a>
       </li>
       <li class="row">
         <span class="row__name">perch</span>
-        <span class="row__desc">VS Code extension &mdash; <code>.kl</code> highlighting, diagnostics, and a native language server.</span>
+        <span class="row__desc">VS Code extension: <code>.kl</code> syntax highlighting, diagnostics, LSP.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/perch">kinglet-lang/perch &rarr;</a>
       </li>
       <li class="row">
         <span class="row__name">crest</span>
-        <span class="row__desc">A dark VS Code color theme drawn from the Kinglet palette.</span>
+        <span class="row__desc">VS Code dark theme using Kinglet colors.</span>
         <a class="row__go" href="https://github.com/kinglet-lang/crest">kinglet-lang/crest &rarr;</a>
       </li>
     </ul>
@@ -156,7 +160,7 @@
     </nav>
     <div class="foot__inner">
       <span class="foot__brand">kinglet-lang</span>
-      <span>natively compiled &middot; proposal-inspired</span>
+      <span>bootstrap compiler &middot; LLVM &middot; pre-1.0</span>
     </div>
   </div>
 </footer>
