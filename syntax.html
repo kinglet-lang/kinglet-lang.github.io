@@ -84,7 +84,7 @@
           <code>kinglet run</code>
         </li>
       </ol>
-      <div class="snippet">
+      <div class="snippet" data-lang="shell">
         <div class="snippet__cap">kinglet init</div>
         <pre>Create a new Kinglet project
 
@@ -107,7 +107,7 @@
         <code>kinglet init myapp</code> skips the prompts and creates <code>./myapp/</code> directly.
         In a non-interactive shell with no path, it defaults to <code>kinglet-app</code>.
       </p>
-      <div class="snippet">
+      <div class="snippet" data-lang="shell">
         <div class="snippet__cap">after build</div>
         <pre>kinglet build
 kinglet run
@@ -128,7 +128,7 @@ kinglet run
       </p>
 
       <h3>What init creates</h3>
-      <div class="snippet">
+      <div class="snippet" data-lang="nest">
         <div class="snippet__cap">kinglet.nest</div>
         <pre>project "demo" version "0.1.0"
 
@@ -143,7 +143,7 @@ build {
   out     = ".kinglet/out"
 }</pre>
       </div>
-      <div class="snippet">
+      <div class="snippet" data-lang="kl">
         <div class="snippet__cap">src/main.kl</div>
         <pre>export module app;
 using io;
@@ -156,7 +156,7 @@ int main() {
 
       <h3>Full manifest</h3>
       <p>A larger project can define multiple targets, directory globs, and dependencies:</p>
-      <div class="snippet">
+      <div class="snippet" data-lang="nest">
         <div class="snippet__cap">kinglet.nest</div>
         <pre>project "myapp" version "0.1.0"
 
@@ -252,13 +252,13 @@ fmt {
         not file path. The compiler resolves imports against the current target's
         <code>sources</code> plus <code>deps</code>.
       </p>
-      <div class="snippet">
+      <div class="snippet" data-lang="kl">
         <div class="snippet__cap">math/basic.kl</div>
         <pre>export module math.basic;
 
 pub int square(int x) { return x * x; }</pre>
       </div>
-      <div class="snippet">
+      <div class="snippet" data-lang="kl">
         <div class="snippet__cap">src/app.kl</div>
         <pre>export module app;
 using io;
@@ -303,7 +303,7 @@ int main() {
       </p>
 
       <h3>Functions</h3>
-      <div class="snippet snippet--plain">
+      <div class="snippet snippet--plain" data-lang="kl">
         <pre>int add(int a, int b) { return a + b; }
 T identity&lt;T&gt;(T x) =&gt; x;              // expression body</pre>
       </div>
@@ -313,7 +313,7 @@ T identity&lt;T&gt;(T x) =&gt; x;              // expression body</pre>
       </p>
 
       <h3>Structs &amp; enums</h3>
-      <div class="snippet snippet--plain">
+      <div class="snippet snippet--plain" data-lang="kl">
         <pre>struct Point { int x; int y; }
 Point p { 3, 4 };                     // struct literal
 
@@ -334,7 +334,7 @@ enum Shape {
         <code>pattern =&gt; expr</code>, comma-separated. The checker enforces exhaustiveness
         on enum and nullable subjects.
       </p>
-      <div class="snippet snippet--plain">
+      <div class="snippet snippet--plain" data-lang="kl">
         <pre>return s match {
   Shape::Circle(let r)     =&gt; 3.14 * r * r,
   Shape::Rect(let w, let h) =&gt; w * h,
@@ -352,7 +352,7 @@ enum Shape {
         Concepts constrain generic code (like traits/interfaces). At least one type parameter
         is required; method signatures need explicit return types.
       </p>
-      <div class="snippet snippet--plain">
+      <div class="snippet snippet--plain" data-lang="kl">
         <pre>concept Printable&lt;T&gt; {
   string to_string(T value);
 }
@@ -370,7 +370,7 @@ string s = n.to_string();   // uniform function call syntax</pre>
         <code>?:</code> is Elvis/coalesce; <code>try</code>/<code>catch</code> handles errors
         in a block.
       </p>
-      <div class="snippet snippet--plain">
+      <div class="snippet snippet--plain" data-lang="kl">
         <pre>int? a = int("123") ?: -1;
 int n = int("bad")?;                  // in T? function: return null on failure
 
@@ -387,7 +387,7 @@ try {
         <code>len()</code>, <code>push</code>, <code>contains</code> — no import needed.
         After <code>using io;</code>:
       </p>
-      <div class="snippet snippet--plain">
+      <div class="snippet snippet--plain" data-lang="kl">
         <pre>io::out("{} {}\n", a, b);
 io::out.line("x={}", v);
 string line = io::in();</pre>
@@ -414,7 +414,7 @@ string line = io::in();</pre>
         <span class="demo__note" id="sample-note">generics + expression functions</span>
       </div>
       <div class="demo__body" id="sample-panel" role="tabpanel">
-        <pre id="sample-code"></pre>
+        <pre id="sample-code" data-lang="kl"></pre>
       </div>
     </div>
 
@@ -466,24 +466,25 @@ string line = io::in();</pre>
   </div>
 </footer>
 
+<script src="/highlight.js"></script>
 <script>
 (function () {
   var SAMPLES = {
     familiar: {
       note: 'generics + expression functions',
-      code: '<span class="k">using</span> io;\n\n<span class="k">struct</span> <span class="t">Box</span>&lt;<span class="t">T</span>&gt; {\n  <span class="t">T</span> value;\n}\n\n<span class="t">T</span> <span class="f">identity</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> x) =&gt; x;\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">Box</span>&lt;<span class="t">int</span>&gt; bi { <span class="n">42</span> };\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, bi.value);                          <span class="c">// &rarr; 42</span>\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));                  <span class="c">// &rarr; 99</span>\n  <span class="k">return</span> <span class="n">0</span>;\n}'
+      code: 'using io;\n\nstruct Box<T> {\n  T value;\n}\n\nT identity<T>(T x) => x;\n\nint main() {\n  Box<int> bi { 42 };\n  io::out("{}\n", bi.value);                          // → 42\n  io::out("{}\n", identity<int>(99));                  // → 99\n  return 0;\n}'
     },
     match: {
       note: 'tagged enums + postfix pattern matching (P2688-style)',
-      code: '<span class="k">enum</span> <span class="t">Shape</span> {\n  <span class="t">Circle</span>(<span class="t">float</span>),\n  <span class="t">Rect</span>(<span class="t">float</span>, <span class="t">float</span>),\n  <span class="t">None</span>,\n}\n\n<span class="t">float</span> <span class="f">area</span>(<span class="t">Shape</span> s) {\n  <span class="k">return</span> s <span class="k">match</span> {\n    <span class="t">Shape</span>::<span class="t">Circle</span>(<span class="k">let</span> r)            =&gt; <span class="n">3.14</span> * r * r,\n    <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="k">let</span> w, <span class="k">let</span> h)        =&gt; w * h,\n    <span class="t">Shape</span>::<span class="t">None</span>                     =&gt; <span class="n">0.0</span>,\n  };\n}'
+      code: 'enum Shape {\n  Circle(float),\n  Rect(float, float),\n  None,\n}\n\nfloat area(Shape s) {\n  return s match {\n    Shape::Circle(let r)            => 3.14 * r * r,\n    Shape::Rect(let w, let h)        => w * h,\n    Shape::None                     => 0.0,\n  };\n}'
     },
     concepts: {
       note: 'concepts + uniform function call syntax',
-      code: '<span class="k">concept</span> <span class="t">Printable</span>&lt;<span class="t">T</span>&gt; {\n  <span class="t">string</span> <span class="f">to_string</span>(<span class="t">T</span> value);\n}\n\n<span class="t">string</span> <span class="f">to_string</span>(<span class="t">int</span> v) {\n  <span class="k">return</span> <span class="s">"n"</span>;\n}\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">int</span> n = <span class="n">42</span>;\n  <span class="t">string</span> s = n.<span class="f">to_string</span>();   <span class="c">// uniform function call</span>\n  <span class="k">return</span> s.<span class="f">len</span>();\n}'
+      code: 'concept Printable<T> {\n  string to_string(T value);\n}\n\nstring to_string(int v) {\n  return "n";\n}\n\nint main() {\n  int n = 42;\n  string s = n.to_string();   // uniform function call\n  return s.len();\n}'
     },
     errors: {
       note: 'nullable T?, coalesce ?:, unwrap ?, try / catch',
-      code: '<span class="t">int</span>? <span class="f">parse_int</span>(<span class="t">string</span> s) {\n  <span class="k">return</span> <span class="t">int</span>(s)? * <span class="n">10</span>;\n}\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">int</span>? a = <span class="t">int</span>(<span class="s">"123"</span>) ?: -<span class="n">1</span>;\n\n  <span class="t">int</span> n;\n  <span class="k">try</span> {\n    n = <span class="t">int</span>(<span class="s">"bad"</span>)?;\n  } <span class="k">catch</span> (<span class="k">let</span> ex: <span class="t">CastError</span>) {\n    n = -<span class="n">99</span>;\n  }\n  <span class="k">return</span> n;\n}'
+      code: 'int? parse_int(string s) {\n  return int(s)? * 10;\n}\n\nint main() {\n  int? a = int("123") ?: -1;\n\n  int n;\n  try {\n    n = int("bad")?;\n  } catch (let ex: CastError) {\n    n = -99;\n  }\n  return n;\n}'
     }
   };
 
@@ -495,7 +496,8 @@ string line = io::in();</pre>
   function setSample(id) {
     var s = SAMPLES[id];
     if (!s) return;
-    codeEl.innerHTML = s.code;
+    codeEl.textContent = s.code;
+    window.KingletHighlight.highlightPre(codeEl, 'kl');
     if (noteEl) noteEl.textContent = s.note;
     tabs.forEach(function (t) {
       t.setAttribute('aria-selected', t.dataset.sample === id ? 'true' : 'false');

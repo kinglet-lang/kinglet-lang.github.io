@@ -383,12 +383,18 @@
     background: rgba(255,255,255,0.15);
     border-radius: 3px;
   }
-  .demo .k { color: #E8A88A; }
-  .demo .t { color: #7EC8D4; }
-  .demo .s { color: #9FD49A; }
-  .demo .n { color: #E8C878; }
-  .demo .f { color: #D4B088; }
-  .demo .c { color: rgba(255,255,255,0.38); }
+  .demo .k,
+  .snippet .k { color: #E8A88A; }
+  .demo .t,
+  .snippet .t { color: #7EC8D4; }
+  .demo .s,
+  .snippet .s { color: #9FD49A; }
+  .demo .n,
+  .snippet .n { color: #E8C878; }
+  .demo .f,
+  .snippet .f { color: #D4B088; }
+  .demo .c,
+  .snippet .c { color: rgba(255,255,255,0.38); }
 
   /* ---------- syntax features (Zig-style bullets) ---------- */
   .feats {
@@ -726,6 +732,10 @@
     -moz-tab-size: 2;
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,0.15) transparent;
+  }
+  .snippet pre span {
+    font: inherit;
+    letter-spacing: inherit;
   }
   .snippet pre::-webkit-scrollbar { height: 6px; }
   .snippet pre::-webkit-scrollbar-thumb {
