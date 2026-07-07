@@ -118,7 +118,6 @@
   /* ---------- hero ---------- */
   .hero {
     padding: clamp(3rem, 8vw, 5.5rem) clamp(1rem, 5vw, 1.5rem) clamp(2rem, 5vw, 3rem);
-    text-align: center;
   }
   .hero__eyebrow {
     font-family: var(--mono);
@@ -128,22 +127,24 @@
     text-transform: uppercase;
     color: var(--ink-3);
     margin: 0 0 1.5rem;
+    text-align: center;
   }
   .hero__logo {
     display: block;
     width: min(360px, 68%);
     max-width: 100%;
     height: auto;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 1.75rem;
   }
   .hero__lede {
-    max-width: 50ch;
-    margin: 0 auto 2.75rem;
+    max-width: 58ch;
+    margin: 0 0 2.75rem;
     font-family: var(--serif);
     font-weight: 400;
     font-size: clamp(1.2rem, 1.8vw, 1.45rem);
-    line-height: 1.45;
+    line-height: 1.5;
     color: var(--ink);
+    text-align: left;
   }
   .hero__lede em {
     color: var(--teal);
@@ -302,69 +303,129 @@
     letter-spacing: 0.01em;
   }
 
-  /* ---------- code examples (syntax) ---------- */
-  .samples { margin-top: 0.5rem; }
-  .code {
-    border: var(--rule);
+  /* ---------- syntax demo ---------- */
+  .demo {
+    margin-top: 1.75rem;
+    background: var(--surface);
     border-radius: 8px;
-    background: var(--paper-2);
-    margin: 1.25rem 0 0;
     overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.04) inset,
+      0 12px 40px -24px rgba(20,16,10,0.45);
   }
-  .code__head {
+  .demo__bar {
     display: flex;
-    align-items: baseline;
+    align-items: stretch;
     justify-content: space-between;
-    gap: 0.8rem;
-    padding: 0.55rem 1rem;
-    background: rgba(60,40,20,0.03);
-    border-bottom: var(--rule);
-    font-family: var(--mono);
-    flex-wrap: wrap;
+    gap: 0.75rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.12) transparent;
   }
-  .code__file { color: var(--ink); font-size: 0.78rem; font-weight: 500; }
-  .code__note { color: var(--ink-3); font-size: 0.74rem; }
-  .code pre {
+  .demo__tabs {
+    display: flex;
+    align-items: stretch;
+    flex: none;
+  }
+  .demo__tab {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    font-weight: 500;
+    padding: 0.7rem 0.85rem;
+    color: rgba(255,255,255,0.42);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .demo__tab:hover { color: rgba(255,255,255,0.72); }
+  .demo__tab[aria-selected="true"] {
+    color: rgba(255,255,255,0.92);
+    border-bottom-color: var(--clay-2);
+  }
+  .demo__note {
+    display: flex;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.34);
+    padding: 0 0.85rem 0 0.25rem;
+    white-space: nowrap;
+    flex: none;
+  }
+  .demo__body { padding: 0; }
+  .demo pre {
     margin: 0;
-    padding: 0.85rem 1rem 1rem;
+    padding: 1rem 1.1rem 1.15rem;
     overflow-x: auto;
     font-family: var(--mono);
     font-size: 0.81rem;
     line-height: 1.62;
-    color: var(--ink);
+    color: rgba(255,255,255,0.88);
     scrollbar-width: thin;
-    scrollbar-color: var(--rule-c) transparent;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
   }
-  .code pre::-webkit-scrollbar { height: 6px; }
-  .code pre::-webkit-scrollbar-thumb { background: var(--rule-c); border-radius: 3px; }
-  .code .k { color: #9C3A1B; }
-  .code .t { color: #1A6B78; }
-  .code .s { color: #3A7228; }
-  .code .n { color: #8A5E10; }
-  .code .f { color: #7A4A1C; }
-  .code .c { color: var(--ink-3); font-style: italic; }
+  .demo pre::-webkit-scrollbar { height: 6px; }
+  .demo pre::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px;
+  }
+  .demo .k { color: #E8A88A; }
+  .demo .t { color: #7EC8D4; }
+  .demo .s { color: #9FD49A; }
+  .demo .n { color: #E8C878; }
+  .demo .f { color: #D4B088; }
+  .demo .c { color: rgba(255,255,255,0.38); font-style: italic; }
 
-  /* ---------- reference rows ---------- */
-  .ref { margin-top: 2rem; border-top: var(--rule); }
-  .ref__row {
+  /* ---------- lexicon (reference chips) ---------- */
+  .lexicon {
+    margin-top: 2.25rem;
+    padding-top: 2rem;
+    border-top: var(--rule);
     display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 1rem;
-    padding: 0.75rem 0;
-    border-bottom: var(--rule);
+    gap: 1.35rem;
+  }
+  .lexicon__group {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 0.5rem 1.25rem;
+    align-items: start;
+  }
+  .lexicon__title {
     font-family: var(--mono);
-    font-size: 0.78rem;
-    line-height: 1.75;
-  }
-  .ref__k {
-    color: var(--clay);
+    font-size: 0.68rem;
     font-weight: 500;
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding-top: 0.15rem;
+    color: var(--clay);
+    margin: 0.28rem 0 0;
   }
-  .ref__v { color: var(--ink-2); }
+  .lexicon__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    padding: 0.18rem 0.48rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule-c);
+    border-radius: 4px;
+    color: var(--ink-2);
+  }
+
+  .syntax__foot {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+  }
 
   /* ---------- sections ---------- */
   .sect {
@@ -473,7 +534,8 @@
   @media (max-width: 720px) {
     .row { grid-template-columns: 1fr; gap: 0.35rem; }
     .row__go { justify-self: start; margin-top: 0.15rem; }
-    .ref__row { grid-template-columns: 1fr; gap: 0.1rem; }
+    .lexicon__group { grid-template-columns: 1fr; gap: 0.45rem; }
+    .demo__note { display: none; }
     .bar__nav { gap: 1rem; }
     .bar__nav .more { display: none; }
     .term__label { display: none; }
@@ -481,7 +543,7 @@
   @media (max-width: 480px) {
     .term__line { font-size: 0.74rem; padding: 0.85rem 0.9rem; }
     .term__copy span { display: none; }
-    .code pre { font-size: 0.75rem; }
+    .demo pre { font-size: 0.75rem; }
     .hero__logo { width: 84%; }
   }
 
@@ -582,107 +644,55 @@
       <strong>pipe</strong> operator.
     </p>
 
-    <div class="samples">
-      <div class="code">
-        <div class="code__head">
-          <span class="code__file">familiar.kl</span>
-          <span class="code__note">generics + expression functions</span>
+    <div class="demo" id="syntax-demo">
+      <div class="demo__bar">
+        <div class="demo__tabs" role="tablist" aria-label="Code examples">
+          <button class="demo__tab" type="button" role="tab" data-sample="familiar" aria-selected="true" aria-controls="sample-panel">familiar.kl</button>
+          <button class="demo__tab" type="button" role="tab" data-sample="match" aria-selected="false" aria-controls="sample-panel">match.kl</button>
+          <button class="demo__tab" type="button" role="tab" data-sample="concepts" aria-selected="false" aria-controls="sample-panel">concepts.kl</button>
+          <button class="demo__tab" type="button" role="tab" data-sample="errors" aria-selected="false" aria-controls="sample-panel">errors.kl</button>
         </div>
-<pre><span class="k">using</span> io;
-
-<span class="k">struct</span> <span class="t">Box</span>&lt;<span class="t">T</span>&gt; {
-  <span class="t">T</span> value;
-}
-
-<span class="t">T</span> <span class="f">identity</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> x) =&gt; x;
-
-<span class="t">int</span> <span class="f">main</span>() {
-  <span class="t">Box</span>&lt;<span class="t">int</span>&gt; bi { <span class="n">42</span> };
-  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, bi.value);              <span class="c">// &rarr; 42</span>
-  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));  <span class="c">// &rarr; 99</span>
-  <span class="k">return</span> <span class="n">0</span>;
-}</pre>
+        <span class="demo__note" id="sample-note">generics + expression functions</span>
       </div>
-
-      <div class="code">
-        <div class="code__head">
-          <span class="code__file">match.kl</span>
-          <span class="code__note">tagged enums + postfix pattern matching (P2688-style)</span>
-        </div>
-<pre><span class="k">enum</span> <span class="t">Shape</span> {
-  <span class="t">Circle</span>(<span class="t">float</span>),
-  <span class="t">Rect</span>(<span class="t">float</span>, <span class="t">float</span>),
-  <span class="t">None</span>,
-}
-
-<span class="t">float</span> <span class="f">area</span>(<span class="t">Shape</span> s) {
-  <span class="k">return</span> s <span class="k">match</span> {
-    <span class="t">Shape</span>::<span class="t">Circle</span>(<span class="k">let</span> r)      =&gt; <span class="n">3.14</span> * r * r,
-    <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="k">let</span> w, <span class="k">let</span> h) =&gt; w * h,
-    <span class="t">Shape</span>::<span class="t">None</span>               =&gt; <span class="n">0.0</span>,
-  };
-}</pre>
-      </div>
-
-      <div class="code">
-        <div class="code__head">
-          <span class="code__file">concepts.kl</span>
-          <span class="code__note">concepts + uniform function call syntax</span>
-        </div>
-<pre><span class="k">concept</span> <span class="t">Printable</span>&lt;<span class="t">T</span>&gt; {
-  <span class="t">string</span> <span class="f">to_string</span>(<span class="t">T</span> value);
-}
-
-<span class="t">string</span> <span class="f">to_string</span>(<span class="t">int</span> v) {
-  <span class="k">return</span> <span class="s">"n"</span>;
-}
-
-<span class="t">int</span> <span class="f">main</span>() {
-  <span class="t">int</span> n = <span class="n">42</span>;
-  <span class="t">string</span> s = n.<span class="f">to_string</span>();   <span class="c">// uniform function call</span>
-  <span class="k">return</span> s.<span class="f">len</span>();
-}</pre>
-      </div>
-
-      <div class="code">
-        <div class="code__head">
-          <span class="code__file">errors.kl</span>
-          <span class="code__note">nullable T?, coalesce ?:, unwrap ?, try / catch</span>
-        </div>
-<pre><span class="t">int</span>? <span class="f">parse_int</span>(<span class="t">string</span> s) {
-  <span class="k">return</span> <span class="t">int</span>(s)? * <span class="n">10</span>;
-}
-
-<span class="t">int</span> <span class="f">main</span>() {
-  <span class="t">int</span>? a = <span class="t">int</span>(<span class="s">"123"</span>) ?: -<span class="n">1</span>;
-
-  <span class="t">int</span> n;
-  <span class="k">try</span> {
-    n = <span class="t">int</span>(<span class="s">"bad"</span>)?;
-  } <span class="k">catch</span> (<span class="k">let</span> ex: <span class="t">CastError</span>) {
-    n = -<span class="n">99</span>;
-  }
-  <span class="k">return</span> n;
-}</pre>
+      <div class="demo__body" id="sample-panel" role="tabpanel">
+        <pre id="sample-code"></pre>
       </div>
     </div>
 
-    <div class="ref">
-      <div class="ref__row">
-        <span class="ref__k">types</span>
-        <span class="ref__v">int &middot; int8 16 32 64 &middot; uint8 16 32 64 &middot; float &middot; float32 64 &middot; double &middot; bool &middot; string &middot; byte &middot; char &middot; void &middot; auto</span>
+    <div class="lexicon">
+      <div class="lexicon__group">
+        <h3 class="lexicon__title">types</h3>
+        <div class="lexicon__chips">
+          <span class="chip">int</span><span class="chip">int8</span><span class="chip">int16</span><span class="chip">int32</span><span class="chip">int64</span>
+          <span class="chip">uint8</span><span class="chip">uint16</span><span class="chip">uint32</span><span class="chip">uint64</span>
+          <span class="chip">float</span><span class="chip">float32</span><span class="chip">float64</span><span class="chip">double</span>
+          <span class="chip">bool</span><span class="chip">string</span><span class="chip">byte</span><span class="chip">char</span><span class="chip">void</span><span class="chip">auto</span>
+        </div>
       </div>
-      <div class="ref__row">
-        <span class="ref__k">operators</span>
-        <span class="ref__v">+ - * / %&nbsp;&nbsp; == != &lt; &gt; &lt;= &gt;=&nbsp;&nbsp; &amp;&amp; || !&nbsp;&nbsp; &amp; | ^ ~ &lt;&lt; &gt;&gt;&nbsp;&nbsp; |&gt; pipe&nbsp;&nbsp; ?: coalesce&nbsp;&nbsp; ? unwrap&nbsp;&nbsp; ::&nbsp;&nbsp; =&gt;</span>
+      <div class="lexicon__group">
+        <h3 class="lexicon__title">operators</h3>
+        <div class="lexicon__chips">
+          <span class="chip">+</span><span class="chip">-</span><span class="chip">*</span><span class="chip">/</span><span class="chip">%</span>
+          <span class="chip">==</span><span class="chip">!=</span><span class="chip">&lt;</span><span class="chip">&gt;</span><span class="chip">&lt;=</span><span class="chip">&gt;=</span>
+          <span class="chip">&amp;&amp;</span><span class="chip">||</span><span class="chip">!</span>
+          <span class="chip">&amp;</span><span class="chip">|</span><span class="chip">^</span><span class="chip">~</span><span class="chip">&lt;&lt;</span><span class="chip">&gt;&gt;</span>
+          <span class="chip">|&gt;</span><span class="chip">?:</span><span class="chip">?</span><span class="chip">::</span><span class="chip">=&gt;</span>
+        </div>
       </div>
-      <div class="ref__row">
-        <span class="ref__k">keywords</span>
-        <span class="ref__v">if else for while guard &middot; match let when &middot; try catch &middot; struct enum concept &middot; using namespace pub import export &middot; const &middot; spawn select</span>
+      <div class="lexicon__group">
+        <h3 class="lexicon__title">keywords</h3>
+        <div class="lexicon__chips">
+          <span class="chip">if</span><span class="chip">else</span><span class="chip">for</span><span class="chip">while</span><span class="chip">guard</span>
+          <span class="chip">match</span><span class="chip">let</span><span class="chip">when</span>
+          <span class="chip">try</span><span class="chip">catch</span>
+          <span class="chip">struct</span><span class="chip">enum</span><span class="chip">concept</span>
+          <span class="chip">using</span><span class="chip">namespace</span><span class="chip">pub</span><span class="chip">import</span><span class="chip">export</span>
+          <span class="chip">const</span><span class="chip">spawn</span><span class="chip">select</span>
+        </div>
       </div>
     </div>
 
-    <p style="margin-top:1.5rem;font-size:0.9rem;color:var(--ink-2)">
+    <p class="syntax__foot">
       Every snippet above is lifted from the compiler&rsquo;s
       <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">runnable test suite</a>
       &mdash; nothing invented.
@@ -835,6 +845,47 @@
     checkIcon.style.display = '';
     clearTimeout(resetTimer);
     resetTimer = setTimeout(resetCopy, 1800);
+  });
+})();
+
+(function () {
+  var SAMPLES = {
+    familiar: {
+      note: 'generics + expression functions',
+      code: '<span class="k">using</span> io;\n\n<span class="k">struct</span> <span class="t">Box</span>&lt;<span class="t">T</span>&gt; {\n  <span class="t">T</span> value;\n}\n\n<span class="t">T</span> <span class="f">identity</span>&lt;<span class="t">T</span>&gt;(<span class="t">T</span> x) =&gt; x;\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">Box</span>&lt;<span class="t">int</span>&gt; bi { <span class="n">42</span> };\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, bi.value);              <span class="c">// &rarr; 42</span>\n  io::<span class="f">out</span>(<span class="s">"{}\n"</span>, <span class="f">identity</span>&lt;<span class="t">int</span>&gt;(<span class="n">99</span>));  <span class="c">// &rarr; 99</span>\n  <span class="k">return</span> <span class="n">0</span>;\n}'
+    },
+    match: {
+      note: 'tagged enums + postfix pattern matching (P2688-style)',
+      code: '<span class="k">enum</span> <span class="t">Shape</span> {\n  <span class="t">Circle</span>(<span class="t">float</span>),\n  <span class="t">Rect</span>(<span class="t">float</span>, <span class="t">float</span>),\n  <span class="t">None</span>,\n}\n\n<span class="t">float</span> <span class="f">area</span>(<span class="t">Shape</span> s) {\n  <span class="k">return</span> s <span class="k">match</span> {\n    <span class="t">Shape</span>::<span class="t">Circle</span>(<span class="k">let</span> r)      =&gt; <span class="n">3.14</span> * r * r,\n    <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="k">let</span> w, <span class="k">let</span> h) =&gt; w * h,\n    <span class="t">Shape</span>::<span class="t">None</span>               =&gt; <span class="n">0.0</span>,\n  };\n}'
+    },
+    concepts: {
+      note: 'concepts + uniform function call syntax',
+      code: '<span class="k">concept</span> <span class="t">Printable</span>&lt;<span class="t">T</span>&gt; {\n  <span class="t">string</span> <span class="f">to_string</span>(<span class="t">T</span> value);\n}\n\n<span class="t">string</span> <span class="f">to_string</span>(<span class="t">int</span> v) {\n  <span class="k">return</span> <span class="s">"n"</span>;\n}\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">int</span> n = <span class="n">42</span>;\n  <span class="t">string</span> s = n.<span class="f">to_string</span>();   <span class="c">// uniform function call</span>\n  <span class="k">return</span> s.<span class="f">len</span>();\n}'
+    },
+    errors: {
+      note: 'nullable T?, coalesce ?:, unwrap ?, try / catch',
+      code: '<span class="t">int</span>? <span class="f">parse_int</span>(<span class="t">string</span> s) {\n  <span class="k">return</span> <span class="t">int</span>(s)? * <span class="n">10</span>;\n}\n\n<span class="t">int</span> <span class="f">main</span>() {\n  <span class="t">int</span>? a = <span class="t">int</span>(<span class="s">"123"</span>) ?: -<span class="n">1</span>;\n\n  <span class="t">int</span> n;\n  <span class="k">try</span> {\n    n = <span class="t">int</span>(<span class="s">"bad"</span>)?;\n  } <span class="k">catch</span> (<span class="k">let</span> ex: <span class="t">CastError</span>) {\n    n = -<span class="n">99</span>;\n  }\n  <span class="k">return</span> n;\n}'
+    }
+  };
+
+  var tabs = document.querySelectorAll('.demo__tab');
+  var codeEl = document.getElementById('sample-code');
+  var noteEl = document.getElementById('sample-note');
+  if (!tabs.length || !codeEl) return;
+
+  function setSample(id) {
+    var s = SAMPLES[id];
+    if (!s) return;
+    codeEl.innerHTML = s.code;
+    if (noteEl) noteEl.textContent = s.note;
+    tabs.forEach(function (t) {
+      t.setAttribute('aria-selected', t.dataset.sample === id ? 'true' : 'false');
+    });
+  }
+
+  setSample('familiar');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { setSample(t.dataset.sample); });
   });
 })();
 </script>
