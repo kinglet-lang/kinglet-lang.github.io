@@ -556,7 +556,6 @@
     .grammar__row { grid-template-columns: 1fr; gap: 0.25rem; }
     .demo__note { display: none; }
     .bar__nav { gap: 1rem; }
-    .bar__nav .more { display: none; }
     .term__label { display: none; }
   }
   @media (max-width: 480px) {
