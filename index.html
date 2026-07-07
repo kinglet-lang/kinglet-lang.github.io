@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
 </head>
 <body>
@@ -32,16 +32,18 @@
 
 
   <section class="hero wrap">
-    <p class="hero__eyebrow">bootstrap compiler &middot; v0.1.1</p>
-    <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="360" height="112">
-    <p class="hero__lede">
-      C++-like syntax, LLVM native backend.<br>
-      Concepts, <code>match</code>, nullable types &mdash; v0.1.1, not C++.
-    </p>
+    <div class="hero__intro">
+      <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="360" height="112">
+      <p class="hero__lede">
+        Compile <code>.kl</code> to native binaries via LLVM.
+        C++-like surface with concepts, <code>match</code>, and nullable types.
+      </p>
+      <p class="hero__tag">bootstrap compiler &middot; v0.1.1</p>
+    </div>
 
-    <p class="hero__meta">Install prebuilt binaries.</p>
-
-    <div class="term" id="install" role="group" aria-label="Install command">
+    <div class="hero__install">
+      <p class="sect__label">install</p>
+      <div class="term" id="install" role="group" aria-label="Install command">
       <div class="term__bar">
         <div class="term__left">
           <div class="term__platforms" role="group" aria-label="Platform">
@@ -67,6 +69,7 @@
         <span class="term__prompt" id="prompt">$</span>
         <code class="term__cmd" id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code>
       </div>
+    </div>
     </div>
   </section>
 
