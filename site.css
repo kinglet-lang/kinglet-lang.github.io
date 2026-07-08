@@ -500,16 +500,19 @@
   .sect p strong { color: var(--ink); font-weight: 600; }
 
   /* ---------- rows ---------- */
-  .rows { margin: 0; padding: 0; list-style: none; }
+  .rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 1.35rem;
+  }
   .row {
     display: grid;
     grid-template-columns: 170px 1fr auto;
     gap: 1.25rem;
     align-items: baseline;
-    padding: 1.15rem 0;
-    border-top: var(--rule);
   }
-  .row:last-child { border-bottom: var(--rule); }
   .row__name {
     font-family: var(--mono);
     font-size: 0.90rem;
