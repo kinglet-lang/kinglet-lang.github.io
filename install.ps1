@@ -56,7 +56,7 @@ function Resolve-Version {
   $release = Invoke-RestMethod -Uri $api -ErrorAction SilentlyContinue
   if (-not $release -or -not $release.tag_name) {
     Warn "No stable (non-prerelease) release found on $Script:Repo yet."
-    Fail "Set `$env:KINGLET_VERSION = 'v0.1.0-rc.3' to install a prerelease, or 'v0.1.1' for the latest."
+    Fail "Set `$env:KINGLET_VERSION = 'v0.1.0-rc.3' to install a prerelease, or 'v0.1.7' for the latest."
   }
   $tag = $release.tag_name
 

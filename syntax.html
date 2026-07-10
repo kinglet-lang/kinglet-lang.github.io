@@ -307,10 +307,15 @@ int main() {
       <h3>Functions</h3>
       <div class="snippet snippet--plain" data-lang="kl">
         <pre>int add(int a, int b) { return a + b; }
-T identity&lt;T&gt;(T x) =&gt; x;              // expression body</pre>
+T identity&lt;T&gt;(T x) =&gt; x;              // expression body
+
+string show(int x) =&gt; "int";
+string show(string x) =&gt; x;           // overloaded by parameter type</pre>
       </div>
       <p>
-        Generic functions monomorphize at compile time. The entry point for binaries is always
+        Generic functions monomorphize at compile time. Plain functions may be
+        overloaded by parameter types; the checker selects the best match using
+        C++-style conversion ranking. The entry point for binaries is always
         <code>int main()</code>.
       </p>
 
@@ -486,7 +491,7 @@ string line = io::in();</pre>
     </nav>
     <div class="foot__inner">
       <span class="foot__brand">kinglet-lang</span>
-      <span>bootstrap compiler &middot; LLVM &middot; v0.1.1</span>
+      <span>bootstrap compiler &middot; LLVM &middot; v0.1.7</span>
     </div>
   </div>
 </footer>
