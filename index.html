@@ -3,248 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kinglet — a C++-ish language with an LLVM compiler</title>
-<meta name="description" content="Kinglet compiles .kl to native code via LLVM. Bootstrap compiler in C++, prebuilt for macOS, Linux, and Windows. Early stage — not production-ready.">
+<title>Kinglet — the Kinglet programming language</title>
+<meta name="description" content="Kinglet is a natively-compiled, C-family programming language with an LLVM backend, developed in the open. A small, explicit language for people who build close to the machine.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/site.css">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/home.css">
 </head>
 <body>
 
-<header class="bar">
-  <div class="wrap bar__inner">
-    <a class="brand" href="/" aria-label="Kinglet home">
-      <span class="brand__name">kinglet<b>.</b>lang</span>
+<header class="nav">
+  <div class="wrap nav__row">
+    <a class="brand" href="/" aria-label="kinglet-lang">
+      <img class="brand__mark" src="/kinglet.svg" alt="" width="28" height="28">
+      <span>kinglet-lang</span>
     </a>
-    <nav class="bar__nav" aria-label="primary">
-      <a href="/syntax.html">Syntax</a>
-      <a href="https://github.com/kinglet-lang" class="gh" aria-label="Kinglet on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        <span>GitHub</span>
-      </a>
+    <nav class="nav__menu" aria-label="primary">
+      <a href="#language">Language</a>
+      <a href="#news">News</a>
+      <a href="#community">Community</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/kinglet-lang">GitHub</a>
     </nav>
   </div>
 </header>
 
-<main id="top">
+<main>
 
-
-  <section class="hero wrap">
-    <div class="hero__intro">
-      <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="360" height="112">
-      <p class="hero__lede">
-        Compile <code>.kl</code> to native binaries via LLVM.
-        C++-like surface with concepts, <code>match</code>, and nullable types.
+  <!-- Hero: wordmark + mission -->
+  <section class="hero">
+    <div class="wrap">
+      <img class="hero__logo" src="/kinglet-brand.svg" alt="Kinglet" width="380" height="117">
+      <p class="hero__mission">
+        Kinglet is a small, natively-compiled language for people who build
+        close to the machine — an ahead-of-time compiler, an explicit surface,
+        and no runtime standing between your code and the hardware.
       </p>
-      <p class="hero__tag">bootstrap compiler &middot; v0.1.7</p>
+      <div class="hero__actions">
+        <a class="btn" href="#install">Get Kinglet</a>
+        <a class="lnk" href="/syntax.html">Read the documentation &rarr;</a>
+      </div>
+      <p class="hero__status">
+        Kinglet is early and experimental. The language and its compiler change
+        between releases; the current toolchain is a reference implementation in
+        C++ that emits native code through LLVM.
+      </p>
     </div>
+  </section>
 
-    <div class="hero__install">
-      <p class="sect__label">install</p>
-      <div class="term" id="install" role="group" aria-label="Install command">
-      <div class="term__bar">
-        <div class="term__left">
-          <div class="term__platforms" role="group" aria-label="Platform">
-            <button class="term__plat" type="button" data-platform="macos" aria-label="macOS" aria-pressed="true" title="macOS">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
-            </button>
-            <button class="term__plat" type="button" data-platform="linux" aria-label="Linux" aria-pressed="false" title="Linux">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021c-.071.006-.13.04-.186.132a.552.552 0 00-.12.27.944.944 0 00-.023.33v.015c.012.135.037.2.08.334.046.134.098.2.166.268.01.009.02.018.034.024-.07.057-.117.07-.176.136a.304.304 0 01-.131.068 2.62 2.62 0 01-.275-.402 1.772 1.772 0 01-.155-.667 1.759 1.759 0 01.08-.668 1.43 1.43 0 01.283-.535c.128-.133.26-.2.418-.2zm1.37 1.706c.332 0 .733.065 1.216.399.293.2.523.269 1.052.468h.003c.255.136.405.266.478.399v-.131a.571.571 0 01.016.47c-.123.31-.516.643-1.063.842v.002c-.268.135-.501.333-.775.465-.276.135-.588.292-1.012.267a1.139 1.139 0 01-.448-.067 3.566 3.566 0 01-.322-.198c-.195-.135-.363-.332-.612-.465v-.005h-.005c-.4-.246-.616-.512-.686-.71-.07-.268-.005-.47.193-.6.224-.135.38-.271.483-.336.104-.074.143-.102.176-.131h.002v-.003c.169-.202.436-.47.839-.601.139-.036.294-.065.466-.065zm2.8 2.142c.358 1.417 1.196 3.475 1.735 4.473.286.534.855 1.659 1.102 3.024.156-.005.33.018.513.064.646-1.671-.546-3.467-1.089-3.966-.22-.2-.232-.335-.123-.335.59.534 1.365 1.572 1.646 2.757.13.535.16 1.104.021 1.67.067.028.135.06.205.067 1.032.534 1.413.938 1.23 1.537v-.043c-.06-.003-.12 0-.18 0h-.016c.151-.467-.182-.825-1.065-1.224-.915-.4-1.646-.336-1.77.465-.008.043-.013.066-.018.135-.068.023-.139.053-.209.064-.43.268-.662.669-.793 1.187-.13.533-.17 1.156-.205 1.869v.003c-.02.334-.17.838-.319 1.35-1.5 1.072-3.58 1.538-5.348.334a2.645 2.645 0 00-.402-.533 1.45 1.45 0 00-.275-.333c.182 0 .338-.03.465-.067a.615.615 0 00.314-.334c.108-.267 0-.697-.345-1.163-.345-.467-.931-.995-1.788-1.521-.63-.4-.986-.87-1.15-1.396-.165-.534-.143-1.085-.015-1.645.245-1.07.873-2.11 1.274-2.763.107-.065.037.135-.408.974-.396.751-1.14 2.497-.122 3.854a8.123 8.123 0 01.647-2.876c.564-1.278 1.743-3.504 1.836-5.268.048.036.217.135.289.202.218.133.38.333.59.465.21.201.477.335.876.335.039.003.075.006.11.006.412 0 .73-.134.997-.268.29-.134.52-.334.74-.4h.005c.467-.135.835-.402 1.044-.7zm2.185 8.958c.037.6.343 1.245.882 1.377.588.134 1.434-.333 1.791-.765l.211-.01c.315-.007.577.01.847.268l.003.003c.208.199.305.53.391.876.085.4.154.78.409 1.066.486.527.645.906.636 1.14l.003-.007v.018l-.003-.012c-.015.262-.185.396-.498.595-.63.401-1.746.712-2.457 1.57-.618.737-1.37 1.14-2.036 1.191-.664.053-1.237-.2-1.574-.898l-.005-.003c-.21-.4-.12-1.025.056-1.69.176-.668.428-1.344.463-1.897.037-.714.076-1.335.195-1.814.12-.465.308-.797.641-.984l.045-.022zm-10.814.049h.01c.053 0 .105.005.157.014.376.055.706.333 1.023.752l.91 1.664.003.003c.243.533.754 1.064 1.189 1.637.434.598.77 1.131.729 1.57v.006c-.057.744-.48 1.148-1.125 1.294-.645.135-1.52.002-2.395-.464-.968-.536-2.118-.469-2.857-.602-.369-.066-.61-.2-.723-.4-.11-.2-.113-.602.123-1.23v-.004l.002-.003c.117-.334.03-.752-.027-1.118-.055-.401-.083-.71.043-.94.16-.334.396-.4.69-.533.294-.135.64-.202.915-.47h.002v-.002c.256-.268.445-.601.668-.838.19-.201.38-.336.663-.336zm7.159-9.074c-.435.201-.945.535-1.488.535-.542 0-.97-.267-1.28-.466-.154-.134-.28-.268-.373-.335-.164-.134-.144-.333-.074-.333.109.016.129.134.199.2.096.066.215.2.36.333.292.2.68.467 1.167.467.485 0 1.053-.267 1.398-.466.195-.135.445-.334.648-.467.156-.136.149-.267.279-.267.128.016.034.134-.147.332a8.097 8.097 0 01-.69.468zm-1.082-1.583V5.64c-.006-.02.013-.042.029-.05.074-.043.18-.027.26.004.063 0 .16.067.15.135-.006.049-.085.066-.135.066-.055 0-.092-.043-.141-.068-.052-.018-.146-.008-.163-.065zm-.551 0c-.02.058-.113.049-.166.066-.047.025-.086.068-.14.068-.05 0-.13-.02-.136-.068-.01-.066.088-.133.15-.133.08-.031.184-.047.259-.005.019.009.036.03.03.05v.02h.003z"/></svg>
-            </button>
-            <button class="term__plat" type="button" data-platform="windows" aria-label="Windows" aria-pressed="false" title="Windows">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.562L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.75-1.801"/></svg>
-            </button>
+  <!-- Design principles — prose, the "why" of the project -->
+  <section class="principles" id="language">
+    <div class="wrap">
+      <p class="label">Why Kinglet</p>
+      <div class="prin__grid">
+        <article class="prin">
+          <h3>Compiled to the metal</h3>
+          <p>Source is lowered ahead of time to native object code through an LLVM backend. There is no interpreter and no virtual machine to ship — the artifact is a binary you can run and profile like any other.</p>
+        </article>
+        <article class="prin">
+          <h3>Familiar, not novel</h3>
+          <p>The surface is deliberately close to the C family. Structs, enums, functions, and generics read the way a C++ or Rust programmer expects, so the language gets out of the way of the work.</p>
+        </article>
+        <article class="prin">
+          <h3>Explicit over implicit</h3>
+          <p>Control flow is visible, nullability lives in the type, and pattern matches are checked for exhaustiveness. The compiler prefers to reject an ambiguous program over guessing what you meant.</p>
+        </article>
+        <article class="prin">
+          <h3>One toolchain</h3>
+          <p>A single binary compiles, builds, and runs your project from a small manifest. Editor tooling and a matching color theme are developed alongside the compiler, in the open.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- A single, representative sample -->
+  <section class="sample">
+    <div class="wrap">
+      <div class="editor">
+        <span class="editor__name">shapes.kl</span>
+<pre><code><span class="k">using</span> io;
+
+<span class="k">enum</span> <span class="t">Shape</span> {
+  <span class="t">Circle</span>(<span class="t">float</span>),
+  <span class="t">Rect</span>(<span class="t">float</span>, <span class="t">float</span>),
+}
+
+<span class="t">float</span> <span class="f">area</span>(<span class="t">Shape</span> s) {
+  <span class="k">return</span> s <span class="k">match</span> {
+    <span class="t">Shape</span>::<span class="t">Circle</span>(<span class="k">let</span> r) => <span class="n">3.14</span> * r * r,
+    <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="k">let</span> w, <span class="k">let</span> h) => w * h,
+  };
+}
+
+<span class="t">int</span> <span class="f">main</span>() {
+  <span class="t">Shape</span>[] shapes = [<span class="t">Shape</span>::<span class="t">Circle</span>(<span class="n">2.0</span>), <span class="t">Shape</span>::<span class="t">Rect</span>(<span class="n">3.0</span>, <span class="n">4.0</span>)];
+  <span class="k">for</span> (<span class="t">int</span> i = <span class="n">0</span>; i &lt; shapes.<span class="f">len</span>(); i = i + <span class="n">1</span>) {
+    io::out.<span class="f">line</span>(<span class="s">"area = {}"</span>, <span class="f">area</span>(shapes[i]));
+  }
+  <span class="k">return</span> <span class="n">0</span>;
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- News / releases — an org homepage staple -->
+  <section class="news" id="news">
+    <div class="wrap">
+      <p class="label">Recent news</p>
+      <ul class="feed">
+        <li>
+          <time datetime="2026-06-22">Jun 22, 2026</time>
+          <div>
+            <h3>Kinglet v0.1.7</h3>
+            <p>Function overloading is documented and enforced by the checker, and the installer now pins prereleases explicitly. See the release notes for the full list of changes.</p>
           </div>
-          <span class="term__label" id="plat-label"><b>macOS</b> <em>arm64</em></span>
+        </li>
+        <li>
+          <time datetime="2026-05-30">May 30, 2026</time>
+          <div>
+            <h3>Toward self-hosting</h3>
+            <p>The bootstrap compiler now builds a growing subset of its own front end, a step on the path from the C++ reference implementation to a compiler written in Kinglet.</p>
+          </div>
+        </li>
+        <li>
+          <time datetime="2026-04-14">Apr 14, 2026</time>
+          <div>
+            <h3>Native backend on Windows</h3>
+            <p><code>kinglet run</code> and <code>kinglet build</code> emit native binaries on Windows through the MinGW LLVM toolchain, alongside the existing macOS and Linux targets.</p>
+          </div>
+        </li>
+      </ul>
+      <p class="more"><a href="https://github.com/kinglet-lang/bootstrap/releases">All releases &rarr;</a></p>
+    </div>
+  </section>
+
+  <!-- Community & governance -->
+  <section class="community" id="community">
+    <div class="wrap">
+      <p class="label">Community</p>
+      <div class="comm__grid">
+        <div class="comm__intro">
+          <h2>Developed in the open.</h2>
+          <p>Kinglet is a volunteer project. The language design, the compiler, and its tooling are discussed and built publicly on GitHub — proposals, bug reports, and patches are all welcome, and the direction of the language is set in the open.</p>
         </div>
-        <button class="term__copy" id="copy" type="button" aria-label="Copy install command">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" id="copy-icon"><rect x="4.5" y="4.5" width="8" height="8" rx="1.2"/><path d="M3 11V3.5C3 3.2 3.2 3 3.5 3H11"/></svg>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" id="check-icon" style="display:none"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span id="copy-label">copy</span>
-        </button>
-      </div>
-      <div class="term__line">
-        <span class="term__prompt" id="prompt">$</span>
-        <code class="term__cmd" id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code>
+        <ul class="comm__links">
+          <li><a href="https://github.com/kinglet-lang/bootstrap">Report an issue</a><span>Compiler bugs, diagnostics, and rough edges.</span></li>
+          <li><a href="https://github.com/kinglet-lang">Read the discussions</a><span>Language proposals and design notes.</span></li>
+          <li><a href="https://github.com/kinglet-lang/bootstrap/blob/canon/CONTRIBUTING.md">Contribute</a><span>How to build the compiler and send a patch.</span></li>
+        </ul>
       </div>
     </div>
+  </section>
+
+  <!-- Install -->
+  <section class="install" id="install">
+    <div class="wrap">
+      <p class="label">Install</p>
+      <h2>Try it in a minute.</h2>
+      <p class="install__intro">One command installs the latest stable release and puts <code>kinglet</code> on your <code>PATH</code>. Then compile and run a file in a single step.</p>
+
+      <div class="cmd">
+        <div class="cmd__tabs" role="group" aria-label="Platform">
+          <button type="button" data-platform="macos" aria-pressed="true">macOS</button>
+          <button type="button" data-platform="linux" aria-pressed="false">Linux</button>
+          <button type="button" data-platform="windows" aria-pressed="false">Windows</button>
+        </div>
+        <div class="cmd__line">
+          <span class="cmd__prompt" id="prompt">$</span>
+          <code id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code>
+          <button class="cmd__copy" id="copy" type="button" aria-label="Copy"><span id="copy-label">copy</span></button>
+        </div>
+      </div>
     </div>
   </section>
-
-  <section class="sect wrap" id="about">
-    <p class="sect__label">about</p>
-    <h2 class="sect__h">What ships today.</h2>
-    <p>
-      Kinglet is an experimental language. The toolchain you can install is a
-      <strong>C++ bootstrap compiler</strong> (<code>kinglet</code> / <code>klet</code>)
-      that lexes, parses, type-checks, lowers to KIR, and emits LLVM object code.
-      There is no package manager, no stable stdlib guarantee, and no self-hosted
-      compiler yet.
-    </p>
-    <p>
-      Language work pulls from WG21 papers that were deferred or dropped &mdash;
-      concepts, tagged enums with <code>match</code>, uniform function call,
-      <code>T?</code> nullables &mdash; but syntax and semantics are trimmed to fit
-      a smaller whole. Details and examples are on the
-      <a href="/syntax.html">syntax page</a>.
-    </p>
-    <p>
-      If you try it, expect compiler bugs and breaking changes between tags.
-      Bug reports and PRs go to
-      <a href="https://github.com/kinglet-lang/bootstrap">bootstrap</a>.
-    </p>
-  </section>
-
-  <section class="sect wrap">
-    <p class="sect__label">install</p>
-    <h2 class="sect__h">Beyond the one-liner.</h2>
-    <ul class="rows">
-      <li class="row">
-        <span class="row__name"><span class="dot">&#9656;</span> pin a prerelease</span>
-        <span class="row__desc">The one-liner installs the latest stable release. Set this before running the script to force a specific tag, including <code>-rc</code> builds.</span>
-        <code>KINGLET_VERSION=v0.1.0-rc.3</code>
-      </li>
-      <li class="row">
-        <span class="row__name"><span class="dot">&#9656;</span> check the binary</span>
-        <span class="row__desc">Install puts <code>kinglet</code> on your PATH. <code>klet</code> is the same executable.</span>
-        <code>kinglet --version</code>
-      </li>
-      <li class="row">
-        <span class="row__name"><span class="dot">&#9656;</span> manual install</span>
-        <span class="row__desc">Download a release tarball and add the directory to <code>PATH</code> yourself.</span>
-        <a class="row__go" href="https://github.com/kinglet-lang/bootstrap/releases">releases &rarr;</a>
-      </li>
-    </ul>
-  </section>
-
-  <section class="sect wrap">
-    <p class="sect__label">repos</p>
-    <h2 class="sect__h">Where the code lives.</h2>
-    <ul class="rows">
-      <li class="row">
-        <span class="row__name">kinglet</span>
-        <span class="row__desc">Language spec notes and the (future) self-hosted compiler.</span>
-        <a class="row__go" href="https://github.com/kinglet-lang/kinglet">kinglet-lang/kinglet &rarr;</a>
-      </li>
-      <li class="row">
-        <span class="row__name">bootstrap</span>
-        <span class="row__desc">The C++ compiler you install. Releases, tests, and install scripts.</span>
-        <a class="row__go" href="https://github.com/kinglet-lang/bootstrap">kinglet-lang/bootstrap &rarr;</a>
-      </li>
-      <li class="row">
-        <span class="row__name">perch</span>
-        <span class="row__desc">VS Code extension: <code>.kl</code> syntax highlighting, diagnostics, LSP.</span>
-        <a class="row__go" href="https://github.com/kinglet-lang/perch">kinglet-lang/perch &rarr;</a>
-      </li>
-      <li class="row">
-        <span class="row__name">crest</span>
-        <span class="row__desc">VS Code dark theme using Kinglet colors.</span>
-        <a class="row__go" href="https://github.com/kinglet-lang/crest">kinglet-lang/crest &rarr;</a>
-      </li>
-    </ul>
-  </section>
-
 
 </main>
 
 <footer class="foot">
-  <div class="wrap">
+  <div class="wrap foot__row">
+    <img src="/kinglet-brandmono.svg" alt="Kinglet" height="24">
     <nav class="foot__links" aria-label="footer">
-      <a href="/syntax.html">syntax</a>
-      <a href="https://github.com/kinglet-lang/bootstrap#readme">docs</a>
-      <a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">examples</a>
-      <a href="https://github.com/kinglet-lang/perch">editor</a>
-      <a href="https://github.com/kinglet-lang/crest">theme</a>
-      <a href="https://github.com/kinglet-lang">github</a>
+      <a href="/syntax.html">Syntax</a>
+      <a href="https://github.com/kinglet-lang/bootstrap">Compiler</a>
+      <a href="https://github.com/kinglet-lang/bootstrap/releases">Releases</a>
+      <a href="https://github.com/kinglet-lang">GitHub</a>
     </nav>
-    <div class="foot__inner">
-      <span class="foot__brand">kinglet-lang</span>
-      <span>bootstrap compiler &middot; LLVM &middot; v0.1.7</span>
-    </div>
+    <span class="foot__note">An experimental language, developed in the open.</span>
   </div>
 </footer>
 
 <script>
 (function () {
-  var tabs = document.querySelectorAll('.term__plat');
+  var tabs = document.querySelectorAll('.cmd__tabs button');
   var promptEl = document.getElementById('prompt');
   var cmdEl = document.getElementById('cmd');
-  var labelEl = document.getElementById('plat-label');
   var copyBtn = document.getElementById('copy');
   var copyLabel = document.getElementById('copy-label');
-  var copyIcon = document.getElementById('copy-icon');
-  var checkIcon = document.getElementById('check-icon');
 
-  var COMMANDS = {
-    macos: {
-      prompt: '$',
-      cmd: 'curl -fsSL https://kinglet-lang.org/install.sh | sh',
-      name: 'macOS',
-      arch: 'arm64'
-    },
-    linux: {
-      prompt: '$',
-      cmd: 'curl -fsSL https://kinglet-lang.org/install.sh | sh',
-      name: 'Linux',
-      arch: 'x64'
-    },
-    windows: {
-      prompt: 'PS>',
-      cmd: 'irm https://kinglet-lang.org/install.ps1 | iex',
-      name: 'Windows',
-      arch: 'x64'
-    }
+  var C = {
+    macos:   { p: '$',   c: 'curl -fsSL https://kinglet-lang.org/install.sh | sh' },
+    linux:   { p: '$',   c: 'curl -fsSL https://kinglet-lang.org/install.sh | sh' },
+    windows: { p: 'PS>', c: 'irm https://kinglet-lang.org/install.ps1 | iex' }
   };
+  var cur = 'macos', timer = null;
 
-  var current = 'macos';
-  var resetTimer = null;
-
-  function detectPlatform() {
-    var ua = navigator.userAgent || '';
-    var plat = navigator.platform || '';
-    if (/Win/i.test(ua) || /Win/i.test(plat)) return 'windows';
-    if (/Mac/i.test(ua) || /Mac/i.test(plat)) return 'macos';
-    if (/Linux/i.test(ua) || /Linux/i.test(plat)) return 'linux';
+  function detect() {
+    var s = (navigator.userAgent || '') + (navigator.platform || '');
+    if (/Win/i.test(s)) return 'windows';
+    if (/Mac/i.test(s)) return 'macos';
+    if (/Linux/i.test(s)) return 'linux';
     return 'macos';
   }
-
-  function setPlatform(p) {
-    current = p;
-    var c = COMMANDS[p];
-    promptEl.textContent = c.prompt;
-    cmdEl.textContent = c.cmd;
-    labelEl.innerHTML = '<b>' + c.name + '</b> <em>' + c.arch + '</em>';
-    tabs.forEach(function (t) {
-      t.setAttribute('aria-pressed', t.dataset.platform === p ? 'true' : 'false');
-    });
+  function set(p) {
+    cur = p;
+    promptEl.textContent = C[p].p;
+    cmdEl.textContent = C[p].c;
+    tabs.forEach(function (t) { t.setAttribute('aria-pressed', t.dataset.platform === p); });
   }
-
-  setPlatform(detectPlatform());
-
-  tabs.forEach(function (t) {
-    t.addEventListener('click', function () { setPlatform(t.dataset.platform); });
-  });
-
-  function resetCopy() {
-    copyLabel.textContent = 'copy';
-    copyBtn.classList.remove('done');
-    copyIcon.style.display = '';
-    checkIcon.style.display = 'none';
-  }
-
+  set(detect());
+  tabs.forEach(function (t) { t.addEventListener('click', function () { set(t.dataset.platform); }); });
   copyBtn.addEventListener('click', function () {
-    var text = COMMANDS[current].cmd;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text);
-    }
+    if (navigator.clipboard) navigator.clipboard.writeText(C[cur].c);
     copyLabel.textContent = 'copied';
-    copyBtn.classList.add('done');
-    copyIcon.style.display = 'none';
-    checkIcon.style.display = '';
-    clearTimeout(resetTimer);
-    resetTimer = setTimeout(resetCopy, 1800);
+    clearTimeout(timer);
+    timer = setTimeout(function () { copyLabel.textContent = 'copy'; }, 1600);
   });
 })();
 </script>

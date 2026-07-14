@@ -1,0 +1,191 @@
+/* ============================================================
+   Kinglet — home stylesheet.
+   Built from the brand assets only. Palette sampled from
+   kinglet.svg (cream #FEF0DF, teal #01628A, orange #FE7C01).
+   Single classical light theme. index.html only; syntax.html
+   keeps site.css.
+   ============================================================ */
+
+:root {
+  --cream:    #FEF0DF;
+  --cream-2:  #ece0cf;
+  --teal:     #01628A;
+  --teal-2:   #1493AB;
+  --orange:   #d96700;   /* darkened for legibility on paper */
+  --orange-b: #FE7C01;
+
+  --ink:      #20282b;   /* near-black ink */
+  --ink-2:    #4a565b;
+  --ink-3:    #7d878c;
+  --rule:     #e2d8c6;   /* faint hairline on paper */
+  --paper:    #FBF6EC;   /* warm classical paper */
+  --panel:    #0a2f3c;   /* deep teal for code */
+  --panel-2:  #0e3a49;
+
+  --serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --wrap: 940px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: rgba(254, 124, 1, 0.20); }
+
+h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 600; line-height: 1.15; letter-spacing: 0; }
+p { margin: 0; }
+
+a { color: var(--teal); text-decoration: none; }
+a:hover { color: var(--orange); text-decoration: underline; text-underline-offset: 3px; }
+
+code { font-family: var(--mono); font-size: 0.78em; color: var(--teal); }
+
+.wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 32px; }
+
+/* section label — the one mono, uppercase device for structure */
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--orange);
+  margin-bottom: 26px;
+}
+
+/* ---------- nav ---------- */
+.nav { padding: 26px 0; border-bottom: 1px solid var(--rule); }
+.nav__row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 600; font-size: 21px; }
+.brand:hover { color: var(--ink); text-decoration: none; }
+.brand__mark { display: block; flex-shrink: 0; }
+.nav__menu { display: flex; gap: 26px; flex-wrap: wrap; }
+.nav__menu a { color: var(--ink-2); font-size: 18px; }
+.nav__menu a:hover { color: var(--orange); text-decoration: none; }
+
+/* ---------- hero ---------- */
+.hero { padding: 72px 0 64px; border-bottom: 1px solid var(--rule); }
+.hero__logo { display: block; width: min(380px, 80vw); height: auto; margin: 0 0 34px -2px; }
+.hero__mission { max-width: 24em; font-size: 26px; line-height: 1.45; color: var(--ink); }
+.hero__actions { margin-top: 34px; display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+.hero__status { margin-top: 40px; max-width: 42em; font-family: var(--sans); font-size: 14.5px; line-height: 1.6; color: var(--ink-3); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 26px;
+  background: var(--orange);
+  color: #fff;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 18px;
+  transition: background .15s ease;
+}
+.btn:hover { background: #b9560a; color: #fff; text-decoration: none; }
+.lnk { font-size: 18px; font-weight: 500; }
+
+/* ---------- principles ---------- */
+.principles { padding: 68px 0; border-bottom: 1px solid var(--rule); }
+.prin__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 56px; }
+.prin h3 { font-size: 25px; font-weight: 600; color: var(--ink); }
+.prin p { margin-top: 12px; font-size: 18px; color: var(--ink-2); }
+
+/* ---------- code sample ---------- */
+.sample { padding: 60px 0; }
+.editor {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 8px 6px 22px;
+  box-shadow: 0 24px 60px rgba(10, 47, 60, 0.20);
+}
+.editor__name { display: block; padding: 14px 26px 10px; font-family: var(--mono); font-size: 12.5px; color: #5f8494; }
+.editor pre { margin: 0; padding: 4px 26px 0; overflow-x: auto; font-family: var(--mono); font-size: 14px; line-height: 1.75; color: #d6e4e8; }
+.editor code { color: inherit; font-size: inherit; }
+
+.k { color: #ffb057; }
+.t { color: #6fd0d6; }
+.s { color: #b6d98a; }
+.n { color: #f0c073; }
+.f { color: #86b6e8; }
+.c { color: #5f8494; font-style: italic; }
+
+/* ---------- news ---------- */
+.news { padding: 68px 0; border-bottom: 1px solid var(--rule); }
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { display: flex; gap: 32px; padding: 24px 0; }
+.feed li + li { border-top: 1px solid var(--rule); }
+.feed time { flex-shrink: 0; width: 140px; font-family: var(--mono); font-size: 13px; color: var(--ink-3); padding-top: 6px; }
+.feed h3 { font-size: 23px; font-weight: 600; color: var(--ink); }
+.feed p { margin-top: 8px; font-size: 18px; color: var(--ink-2); }
+.more { margin-top: 28px; font-size: 18px; }
+
+/* ---------- community ---------- */
+.community { padding: 68px 0; border-bottom: 1px solid var(--rule); }
+.comm__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+.comm__intro h2 { font-size: 34px; font-weight: 600; color: var(--ink); }
+.comm__intro p { margin-top: 16px; font-size: 19px; color: var(--ink-2); }
+.comm__links { list-style: none; margin: 0; padding: 0; }
+.comm__links li { padding: 16px 0; }
+.comm__links li + li { border-top: 1px solid var(--rule); }
+.comm__links a { font-size: 20px; font-weight: 600; }
+.comm__links span { display: block; margin-top: 2px; font-size: 16px; color: var(--ink-3); }
+
+/* ---------- install ---------- */
+.install { padding: 68px 0; }
+.install h2 { font-size: 34px; font-weight: 600; color: var(--ink); }
+.install__intro { margin-top: 16px; max-width: 34em; font-size: 19px; color: var(--ink-2); }
+.cmd { margin-top: 30px; max-width: 640px; background: var(--panel); border-radius: 10px; overflow: hidden; }
+.cmd__tabs { display: flex; padding: 0 8px; background: var(--panel-2); }
+.cmd__tabs button {
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6f95a3;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+.cmd__tabs button:hover { color: #cfe3e8; }
+.cmd__tabs button[aria-pressed="true"] { color: var(--orange-b); border-bottom-color: var(--orange-b); }
+.cmd__line { display: flex; align-items: center; gap: 12px; padding: 16px 20px; }
+.cmd__prompt { color: var(--orange-b); font-family: var(--mono); font-weight: 600; }
+#cmd { flex: 1; color: #e6eff1; font-family: var(--mono); font-size: 14px; white-space: nowrap; overflow-x: auto; }
+.cmd__copy { background: none; border: none; color: #6f95a3; font-family: var(--mono); font-size: 12px; cursor: pointer; transition: color .15s ease; }
+.cmd__copy:hover { color: var(--orange-b); }
+
+/* ---------- footer ---------- */
+.foot { padding: 40px 0 60px; border-top: 1px solid var(--rule); }
+.foot__row { display: flex; align-items: center; gap: 20px 32px; flex-wrap: wrap; }
+.foot__row img { opacity: 0.65; flex-shrink: 0; }
+.foot__links { display: flex; gap: 24px; flex-wrap: wrap; }
+.foot__links a { color: var(--ink-2); font-size: 17px; }
+.foot__links a:hover { color: var(--orange); }
+.foot__note { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-3); font-style: normal; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 760px) {
+  body { font-size: 19px; }
+  .prin__grid, .comm__grid { grid-template-columns: 1fr; gap: 32px; }
+  .hero__mission { font-size: 23px; }
+  .feed li { flex-direction: column; gap: 6px; }
+  .feed time { width: auto; padding-top: 0; }
+}
+@media (max-width: 560px) {
+  .nav__row { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .foot__note { margin-left: 0; }
+}
