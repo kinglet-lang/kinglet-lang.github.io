@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<BaseLayout title="Blog — Kinglet" description="Long-form writing from the Kinglet project.">
+<SiteHeader />
+
+<main>
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Blog</p>
+        <h1>Notes on how<br />Kinglet is built.</h1>
+        <p class="lede">Design decisions, deep dives, and other longer writing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="language">
+    <div class="shell">
+      <ul class="post-list">
+        {posts.map(post => (
+          <li>
+            <a href={`/blog/${post.id}/`}>
+              <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+              <h2>{post.data.title}</h2>
+              {post.data.description && <p>{post.data.description}</p>}
+            </a>
+          </li>
+        ))}
+        {posts.length === 0 && <li><p>No posts yet.</p></li>}
+      </ul>
+    </div>
+  </section>
+</main>
+
+<SiteFooter />
+</BaseLayout>

@@ -1,0 +1,19 @@
+{
+  "name": "kinglet-lang-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.13.1",
+  "scripts": {
+    "dev": "astro dev --host --port 8000",
+    "build": "astro build",
+    "preview": "astro preview --host --port 8000",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.14.0",
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/rss": "^4.0.0",
+    "@astrojs/sitemap": "^3.6.0"
+  }
+}

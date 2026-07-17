@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { getCollection } from 'astro:content';
+
+const entries = (await getCollection('docs', ({ data }) => !data.draft))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const bySection: Record<string, typeof entries> = {};
+for (const e of entries) {
+  const key = e.data.section ?? 'guide';
+  (bySection[key] ??= []).push(e);
+}
+---
+<BaseLayout title="Docs — Kinglet" description="Tutorials and reference notes for the Kinglet language and toolchain.">
+<SiteHeader />
+
+<main>
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Docs</p>
+        <h1>Learn Kinglet<br />at your own pace.</h1>
+        <p class="lede">Tutorials, how-tos, and reference notes for the Kinglet toolchain.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="language">
+    <div class="shell">
+      {Object.keys(bySection).length === 0 && <p style="padding-block: 72px;">No documentation yet.</p>}
+      {Object.entries(bySection).map(([section, items]) => (
+        <div class="doc-section">
+          <p class="section-number">{section}</p>
+          <ul class="post-list">
+            {items.map(item => (
+              <li>
+                <a href={`/docs/${item.id}/`}>
+                  <h2>{item.data.title}</h2>
+                  {item.data.description && <p>{item.data.description}</p>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</main>
+
+<SiteFooter />
+</BaseLayout>

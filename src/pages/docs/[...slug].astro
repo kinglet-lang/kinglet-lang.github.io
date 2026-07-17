@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs', ({ data }) => !data.draft);
+  return entries.map(entry => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<BaseLayout title={`${entry.data.title} — Kinglet Docs`} description={entry.data.description}>
+<SiteHeader />
+
+<main>
+  <article class="post">
+    <div class="shell post-shell">
+      <p class="eyebrow"><a href="/docs">Docs</a>{entry.data.section && <> · {entry.data.section}</>}</p>
+      <h1>{entry.data.title}</h1>
+      {entry.data.description && <p class="lede">{entry.data.description}</p>}
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</main>
+
+<SiteFooter />
+</BaseLayout>

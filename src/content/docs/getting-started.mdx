@@ -1,0 +1,44 @@
+---
+title: "Getting started"
+description: "Install the Kinglet toolchain and build your first program."
+order: 1
+section: "start"
+---
+
+This guide walks through installing the Kinglet toolchain and compiling a first program.
+
+## Install
+
+**macOS / Linux**
+
+```sh
+curl -fsSL https://kinglet-lang.org/install.sh | sh
+```
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://kinglet-lang.org/install.ps1 | iex
+```
+
+## Hello, Kinglet
+
+Create `hello.kl`:
+
+```kinglet
+using io;
+
+int main() {
+  io::out("Hello, Kinglet!\n");
+  return 0;
+}
+```
+
+Build and run:
+
+```sh
+kinglet build hello.kl
+./hello
+```
+
+For more topics, browse the [documentation index](/docs).

@@ -15,24 +15,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Sync install scripts from bootstrap
         run: |
-          curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh -o install.sh
-          chmod +x install.sh
-          curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.ps1 -o install.ps1
+          curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh -o public/install.sh
+          chmod +x public/install.sh
+          curl -fsSL https://raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.ps1 -o public/install.ps1
           # Keep one-liner URLs in script headers aligned with this site.
-          sed -i 's|raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh|kinglet-lang.org/install.sh|' install.sh
-          sed -i 's|raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.ps1|kinglet-lang.org/install.ps1|' install.ps1
-      - uses: actions/configure-pages@v4
+          sed -i 's|raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.sh|kinglet-lang.org/install.sh|' public/install.sh
+          sed -i 's|raw.githubusercontent.com/kinglet-lang/bootstrap/canon/scripts/install.ps1|kinglet-lang.org/install.ps1|' public/install.ps1
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
