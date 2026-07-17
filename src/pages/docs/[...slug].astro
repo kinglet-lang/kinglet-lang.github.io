@@ -5,28 +5,45 @@ import SiteFooter from '../../components/SiteFooter.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('docs', ({ data }) => !data.draft);
-  return entries.map(entry => ({ params: { slug: entry.id }, props: { entry } }));
+  const entries = (await getCollection('docs', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: { entry, entries, previous: entries[index - 1], next: entries[index + 1] },
+  }));
 }
 
-const { entry } = Astro.props;
+const { entry, entries, previous, next } = Astro.props;
 const { Content } = await render(entry);
+const bySection: Record<string, typeof entries> = {};
+for (const item of entries) (bySection[item.data.section ?? 'guide'] ??= []).push(item);
 ---
 <BaseLayout title={`${entry.data.title} — Kinglet Docs`} description={entry.data.description}>
 <SiteHeader />
+<main class="docs-page">
+  <div class="shell docs-reader">
+    <aside class="docs-sidebar" aria-label="Documentation navigation">
+      <a class="docs-sidebar__home" href="/docs">← Documentation</a>
+      {Object.entries(bySection).map(([section, items]) => (
+        <section>
+          <h2>{section}</h2>
+          <nav>{items.map(item => <a class={item.id === entry.id ? 'active' : ''} aria-current={item.id === entry.id ? 'page' : undefined} href={`/docs/${item.id}/`}>{item.data.title}</a>)}</nav>
+        </section>
+      ))}
+    </aside>
 
-<main>
-  <article class="post">
-    <div class="shell post-shell">
-      <p class="eyebrow"><a href="/docs">Docs</a>{entry.data.section && <> · {entry.data.section}</>}</p>
-      <h1>{entry.data.title}</h1>
-      {entry.data.description && <p class="lede">{entry.data.description}</p>}
-      <div class="prose">
-        <Content />
-      </div>
-    </div>
-  </article>
+    <article class="docs-article">
+      <header>
+        <p class="eyebrow">Docs · {entry.data.section}</p>
+        <h1>{entry.data.title}</h1>
+        {entry.data.description && <p class="lede">{entry.data.description}</p>}
+      </header>
+      <div class="prose"><Content /></div>
+      <nav class="docs-pager" aria-label="Documentation pagination">
+        {previous ? <a href={`/docs/${previous.id}/`}><small>Previous</small><span>← {previous.data.title}</span></a> : <span />}
+        {next && <a class="next" href={`/docs/${next.id}/`}><small>Next</small><span>{next.data.title} →</span></a>}
+      </nav>
+    </article>
+  </div>
 </main>
-
 <SiteFooter />
 </BaseLayout>

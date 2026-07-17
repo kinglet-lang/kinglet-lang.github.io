@@ -8,26 +8,22 @@ export async function getStaticPaths() {
   const posts = await getCollection('news', ({ data }) => !data.draft);
   return posts.map(post => ({ params: { slug: post.id }, props: { post } }));
 }
-
 const { post } = Astro.props;
 const { Content } = await render(post);
-const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const fmt = (d: Date) => d.toLocaleDateString('en', { year: 'numeric', month: 'long', day: '2-digit', timeZone: 'UTC' });
 ---
 <BaseLayout title={`${post.data.title} — Kinglet News`} description={post.data.description}>
 <SiteHeader />
-
-<main>
-  <article class="post">
-    <div class="shell post-shell">
-      <p class="eyebrow"><a href="/news">News</a> · <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time></p>
-      <h1>{post.data.title}</h1>
-      {post.data.description && <p class="lede">{post.data.description}</p>}
-      <div class="prose">
-        <Content />
+<main class="news-page">
+  <article class="news-article">
+    <header>
+      <div class="shell news-article__head">
+        <div><a class="back-link" href="/news">← Project log</a><time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time></div>
+        <div><div class="news-tags">{post.data.tags.map(tag => <span>{tag}</span>)}</div><h1>{post.data.title}</h1>{post.data.description && <p>{post.data.description}</p>}</div>
       </div>
-    </div>
+    </header>
+    <div class="shell news-article__body"><div class="prose"><Content /></div></div>
   </article>
 </main>
-
 <SiteFooter />
 </BaseLayout>

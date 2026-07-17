@@ -6,40 +6,32 @@ import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('news', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
-
-const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const fmt = (d: Date) => d.toLocaleDateString('en', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' });
 ---
-<BaseLayout title="News — Kinglet" description="Release notes, tutorials, and other news from the Kinglet project.">
+<BaseLayout title="News — Kinglet" description="Releases and engineering updates from the Kinglet project.">
 <SiteHeader />
-
-<main>
-  <section class="hero">
-    <div class="shell hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow">News</p>
-        <h1>What's shipping<br />in the Kinglet project.</h1>
-        <p class="lede">Release notes, tutorial drops, and design updates. Written in the open.</p>
-      </div>
+<main class="news-page">
+  <header class="subpage-hero news-hero">
+    <div class="shell subpage-hero__grid">
+      <div><p class="eyebrow">Project log</p><h1>What changed,<br />and why it matters.</h1></div>
+      <div class="news-intro"><p>Compiler releases, language decisions, and tooling milestones from the Kinglet project.</p><a href="/news/rss.xml">RSS feed ↗</a></div>
     </div>
-  </section>
+  </header>
 
-  <section class="language">
-    <div class="shell">
-      <ul class="post-list">
-        {posts.map(post => (
-          <li>
-            <a href={`/news/${post.id}/`}>
-              <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
-              <h2>{post.data.title}</h2>
-              {post.data.description && <p>{post.data.description}</p>}
-            </a>
-          </li>
-        ))}
-        {posts.length === 0 && <li><p>No posts yet.</p></li>}
-      </ul>
-    </div>
+  <section class="shell news-timeline" aria-label="Project updates">
+    {posts.map((post, index) => (
+      <article>
+        <div class="news-date"><span>{String(posts.length - index).padStart(2, '0')}</span><time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time></div>
+        <a href={`/news/${post.id}/`}>
+          <div class="news-tags">{post.data.tags.map(tag => <span>{tag}</span>)}</div>
+          <h2>{post.data.title}</h2>
+          {post.data.description && <p>{post.data.description}</p>}
+          <b>Read update →</b>
+        </a>
+      </article>
+    ))}
+    {posts.length === 0 && <p class="empty-state">No project updates yet.</p>}
   </section>
 </main>
-
 <SiteFooter />
 </BaseLayout>

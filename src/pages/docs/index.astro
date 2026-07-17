@@ -6,48 +6,55 @@ import { getCollection } from 'astro:content';
 
 const entries = (await getCollection('docs', ({ data }) => !data.draft))
   .sort((a, b) => a.data.order - b.data.order);
-
 const bySection: Record<string, typeof entries> = {};
-for (const e of entries) {
-  const key = e.data.section ?? 'guide';
-  (bySection[key] ??= []).push(e);
+for (const entry of entries) {
+  const key = entry.data.section ?? 'guide';
+  (bySection[key] ??= []).push(entry);
 }
+const sections = Object.entries(bySection);
 ---
 <BaseLayout title="Docs — Kinglet" description="Tutorials and reference notes for the Kinglet language and toolchain.">
 <SiteHeader />
-
-<main>
-  <section class="hero">
-    <div class="shell hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow">Docs</p>
-        <h1>Learn Kinglet<br />at your own pace.</h1>
-        <p class="lede">Tutorials, how-tos, and reference notes for the Kinglet toolchain.</p>
+<main class="docs-page">
+  <header class="subpage-hero docs-hero">
+    <div class="shell subpage-hero__grid">
+      <div>
+        <p class="eyebrow">Kinglet documentation</p>
+        <h1>Build with the language,<br />not around it.</h1>
       </div>
+      <p>Installation, language concepts, standard modules, and compiler tooling—organized as a technical manual rather than a feed.</p>
     </div>
-  </section>
+  </header>
 
-  <section class="language">
-    <div class="shell">
-      {Object.keys(bySection).length === 0 && <p style="padding-block: 72px;">No documentation yet.</p>}
-      {Object.entries(bySection).map(([section, items]) => (
-        <div class="doc-section">
-          <p class="section-number">{section}</p>
-          <ul class="post-list">
-            {items.map(item => (
+  <div class="shell docs-index-layout">
+    <aside class="docs-index-nav" aria-label="Documentation sections">
+      <p>On this page</p>
+      <nav>
+        {sections.map(([section]) => <a href={`#${section}`}>{section}</a>)}
+      </nav>
+      <a class="docs-source" href="https://github.com/kinglet-lang/kinglet-lang.github.io/tree/master/src/content/docs">Edit docs on GitHub ↗</a>
+    </aside>
+
+    <div class="docs-groups">
+      {sections.length === 0 && <p>No documentation yet.</p>}
+      {sections.map(([section, items], sectionIndex) => (
+        <section class="docs-group" id={section}>
+          <header><span>{String(sectionIndex + 1).padStart(2, '0')}</span><h2>{section}</h2></header>
+          <ol>
+            {items.map((item, itemIndex) => (
               <li>
                 <a href={`/docs/${item.id}/`}>
-                  <h2>{item.data.title}</h2>
-                  {item.data.description && <p>{item.data.description}</p>}
+                  <span>{String(itemIndex + 1).padStart(2, '0')}</span>
+                  <div><h3>{item.data.title}</h3>{item.data.description && <p>{item.data.description}</p>}</div>
+                  <b aria-hidden="true">→</b>
                 </a>
               </li>
             ))}
-          </ul>
-        </div>
+          </ol>
+        </section>
       ))}
     </div>
-  </section>
+  </div>
 </main>
-
 <SiteFooter />
 </BaseLayout>
