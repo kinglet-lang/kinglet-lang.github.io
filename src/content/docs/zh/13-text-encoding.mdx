@@ -1,0 +1,131 @@
+---
+title: "13 文本编码"
+order: 130
+section: "system"
+locale: "zh"
+---
+上一章已经把文件系统 API 收束到 `byte[]`：`fs::read` 返回 bytes，`fs::write` 接收 bytes。文本文件不是 `fs` 的特殊情况，而是在文件边界外显式做编码/解码。本章介绍 `txt` 命名空间。
+
+## UTF-8：最常用路径
+
+```kl
+using io;
+using txt;
+
+int main() {
+  byte[] data = txt::utf8.encode("default");
+  io::out.line("{}", data.len());
+  io::out.line("{}", data[0]);
+
+  string text = txt::utf8.decode(data);
+  io::out.line("{}", text);
+  return 0;
+}
+```
+
+输出中 `data.len()` 是 `7`，`data[0]` 是 `100`。这就是字符串 `"default"` 的 UTF-8 字节序列。
+
+## 写文本文件
+
+`fs::write` 只接受 `byte[]`，所以写文本时先 encode：
+
+```kl
+using fs;
+using txt;
+
+int main() {
+  byte[] data = txt::utf8.encode("default");
+  fs::write("/tmp/config.txt", data);
+  return 0;
+}
+```
+
+不要写：
+
+```kl
+string data = "default";
+fs::write("/tmp/config.txt", data); // 类型错误：fs::write 要 byte[]
+```
+
+`txt::utf8.encode(...)` 是把 `string` 变成 `byte[]` 的明确边界。
+
+## 读文本文件
+
+读文件时反过来：先读 bytes，再 decode：
+
+```kl
+using fs;
+using txt;
+
+int main() {
+  byte[] raw = fs::read("/tmp/config.txt");
+  string text = txt::utf8.decode(raw);
+  return 0;
+}
+```
+
+这样 `fs` 不需要猜文件是什么编码。调用处自己决定按 UTF-8、GBK，还是未来其他 codec 解释。
+
+## GBK
+
+GBK 使用同样形态：
+
+```kl
+using io;
+using txt;
+
+int main() {
+  byte[] data = txt::gbk.encode("中文");
+  io::out.line("{}", data.len());
+  io::out.line("{}", data[0]);
+  io::out.line("{}", data[1]);
+  io::out.line("{}", data[2]);
+  io::out.line("{}", data[3]);
+
+  string text = txt::gbk.decode(data);
+  io::out.line("{}", text);
+  return 0;
+}
+```
+
+当前测试确认 `"中文"` 编码为 GBK 后是 4 个字节：
+
+```text
+214
+208
+206
+196
+```
+
+再 `txt::gbk.decode(data)` 会回到 `"中文"`。
+
+## 为什么不是 `txt::encode(text, "utf-8")`
+
+Kinglet 当前选择：
+
+```kl
+txt::utf8.encode(text)
+txt::gbk.encode(text)
+```
+
+而不是：
+
+```kl
+txt::encode(text, "utf-8")
+```
+
+原因是 encoding name 不是普通文本数据，而是 API surface 的一部分。写成 namespace/member 后，拼错可以静态报错，也方便以后给每种 codec 增加自己的选项和文档。
+
+## 重要边界
+
+- `using txt;` 必须显式写；否则 `txt::utf8.encode(...)` 会报未导入模块。
+- `encode` 参数必须是 `string`，返回 `byte[]`。
+- `decode` 参数必须是 `byte[]`，返回 `string`。
+- invalid byte sequence 的错误策略还没有最终语言级设计；目前不要依赖错误输入的具体结果。
+- `txt` 是文本编码边界，不是文件系统 API；文件读写仍在 `fs`。
+
+## Related
+
+- Text Encoding
+- [12 I/O 与文件系统](/zh/docs/12-io-and-filesystem)
+- ADR 0032

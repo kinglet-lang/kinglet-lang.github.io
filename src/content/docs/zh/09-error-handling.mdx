@@ -1,0 +1,285 @@
+---
+title: "09 错误处理"
+order: 90
+section: "semantics"
+locale: "zh"
+---
+Kinglet 的错误处理围绕两个核心机制：**可失败操作产生 `T?`**（Optional），和**三种处理 Optional/错误的方式**（`?:` 兜底、`?` 传播、`try/catch` 捕获）。第 05 章已经介绍了 `?:` 和 `?` 的基本用法，这一章把它们放在"错误处理"的框架下系统讲清楚。
+
+## 错误从哪来
+
+Kinglet 中唯一内建的可失败操作是**可失败 cast** -- 把一个值转换成另一个类型，可能失败：
+
+```kl
+int("42")    // 成功 -> 42（但结果类型是 int?）
+int("abc")   // 失败 -> null（结果类型是 int?）
+```
+
+可失败 cast 的结果类型始终是 `T?`，不是 `T`。成功时值被 Optional 包装，失败时是 `null`。详见 [04 类型转换](/zh/docs/04-type-conversion)。
+
+除了 cast，`T?` 变量本身也可以处于 `null` 状态。不管是 cast 失败还是 Optional 变量为 null，处理方式完全一样。
+
+> **注意**：Kinglet 没有 `Result<T, E>` 类型，也没有异常throw机制。所有错误都通过 `T?` 表达，所有错误处理都是处理 Optional。
+
+## 处理方式一：`?:` 兜底
+
+`?:` 是 null/error coalescing 操作符。左边是 null 时取右边的值：
+
+### 对普通 Optional 变量：解包为 T
+
+```kl
+using io;
+
+int main() {
+  int? a = 42;
+  int x = a ?: -1;       // a 有值, 解包为 42
+  io::out.line("{}", x);  // 42
+
+  int? b;                 // null
+  int y = b ?: -1;        // b 是 null, 用 -1
+  io::out.line("{}", y);  // -1
+  return 0;
+}
+```
+
+对普通 Optional 变量，`?:` 的结果类型是**底层类型 T**，不是 `T?`。
+
+### 对可失败 cast：结果始终是 T?
+
+```kl
+int? a = int("123") ?: -1;    // OK -- 结果是 int?
+int? b = int("xyz") ?: -1;    // OK -- 结果是 int?, 值是 -1
+int  c = int("42")  ?: -1;    // 编译错误：Cannot assign int? to variable of type int.
+```
+
+`?:` 知道左边来自一次可失败操作，保留 Optional 包装让调用方明确意识到这条路径。
+
+### `let err =>` 绑定错误
+
+当 `?:` 左边是可失败 cast 时，可以用 `let err =>` 绑定 `CastError`：
+
+```kl
+using io;
+
+int main() {
+  int? a = int("bad") ?: let err => -1;
+  io::out.line("{}", a);     // -1
+  return 0;
+}
+```
+
+`err` 的类型是 `CastError`，可以在 fallback 表达式里使用。
+
+### 链式 `?:`
+
+多个可失败操作可以链式兜底，依次尝试：
+
+```kl
+using io;
+
+int main() {
+  int? d = int("bad1") ?: int("bad2") ?: int("99") ?: -1;
+  io::out.line("{}", d);   // 99
+  return 0;
+}
+```
+
+## 处理方式二：`?` 传播
+
+postfix `?` 把失败传播到外层上下文。传播方式取决于当前上下文：
+
+### 函数级传播：返回 null
+
+在普通函数体里，`expr?` 如果遇到失败，函数立即返回 `null`：
+
+```kl
+using io;
+
+int? safe_parse(string s) {
+  return int(s)?;    // cast 失败时函数直接返回 null
+}
+
+int main() {
+  int? a = safe_parse("42") ?: -1;
+  io::out.line("{}", a);   // 42
+
+  int? b = safe_parse("bad") ?: -1;
+  io::out.line("{}", b);   // -1
+  return 0;
+}
+```
+
+`?` 让你不用写 `if (x == null) return null;` 这样的样板代码。
+
+### try/catch 内传播：跳到 catch
+
+`?` 在 `try` 块里时，失败会跳到 `catch`，而不是返回 `null`：
+
+```kl
+using io;
+
+int main() {
+  int n;
+  try {
+    n = int("bad")?;              // cast 失败, ? 传播到 catch
+  } catch (let ex: CastError) {
+    n = -99;
+  }
+  io::out.line("n={}", n);   // n=-99
+  return 0;
+}
+```
+
+成功路径不执行 catch 块：
+
+```kl
+int m;
+try {
+  m = int("42")?;                // cast 成功, ? 不触发
+} catch (let ex: CastError) {
+  m = -99;
+}
+io::out.line("m={}", m);   // m=42
+```
+
+## try/catch 详解
+
+### 语法
+
+```kl
+try {
+  // 代码块
+} catch (let name: Type) {
+  // 错误处理
+} catch (let name: Type) {
+  // 另一种错误类型
+}
+```
+
+至少需要一个 `catch` 子句。每个 `catch` 绑定一个变量名和错误类型。
+
+### 多 catch 子句
+
+可以有多个 `catch` 子句，按类型匹配。第一个匹配的 catch 被执行：
+
+```kl
+using io;
+
+int main() {
+  int n;
+  try {
+    n = int("bad")?;
+  } catch (let e: CastError) {
+    io::out.line("cast error");
+    n = -1;
+  } catch (let e: string) {
+    io::out.line("string error");
+    n = -2;
+  }
+  io::out.line("n={}", n);   // n=-1
+  return 0;
+}
+```
+
+### catch 的错误类型
+
+`catch` 子句的类型可以是：
+- `CastError` -- 内建类型，cast 失败时产生
+- `string` -- 字符串错误
+- 用户定义的 enum 类型
+
+`CastError` 是编译器内建的 enum，不需要声明，每个程序都隐含可见。
+
+### `?` 是 try/catch 的触发器
+
+**只有 `?` postfix 操作符在 try 块内失败时才会跳到 catch。** 不带 `?` 的可失败 cast 不会触发 catch：
+
+```kl
+try {
+  int? x = int("bad");    // 不带 ?, 不会跳到 catch
+  // x 现在是 null, 但 try 块继续执行
+} catch (let e: CastError) {
+  // 不会执行
+}
+```
+
+```kl
+try {
+  int x = int("bad")?;    // 带 ?, 失败时跳到 catch
+} catch (let e: CastError) {
+  // 会执行
+}
+```
+
+## 三种方式的对比
+
+| 方式 | 语法 | 适用场景 | 结果类型 |
+|------|------|----------|----------|
+| `?:` 兜底 | `expr ?: fallback` | 有合理的默认值 | T（普通 Optional）或 T?（cast） |
+| `?` 传播（函数级） | `expr?` | 让调用方处理错误 | 函数返回 T? |
+| `?` 传播（try 内） | `expr?` | 需要在 catch 中做恢复 | catch 块决定 |
+
+选择建议：
+- **有默认值** -> 用 `?:`，一行搞定
+- **让调用方决定** -> 用函数级 `?`，把错误往上抛
+- **需要恢复或记录** -> 用 `try/catch`
+
+## 自定义错误模式
+
+Kinglet 没有 `Result<T, E>`，但可以用 enum + match 模拟类似模式：
+
+```kl
+using io;
+
+enum Result {
+  Ok(int),
+  Err(string),
+}
+
+Result divide(int a, int b) {
+  if (b == 0) {
+    return Result::Err("division by zero");
+  }
+  return Result::Ok(a / b);
+}
+
+int main() {
+  Result r = divide(10, 0);
+  r match {
+    Result::Ok(let val) => io::out.line("result: {}", val),
+    Result::Err(let msg) => io::out.line("error: {}", msg),
+  };
+  return 0;
+}
+```
+
+这种模式比 `try/catch` 更显式：调用方必须在 match 中处理两种情况，编译器通过穷尽性检查保证不会遗漏。
+
+## 没有的东西
+
+- **没有 `??` 操作符**：null 传播用 `?`（单个问号），兜底用 `?:`（问号冒号）。写成 `??` 会被 lexer 拒绝。
+- **没有 throw/raise**：不能主动抛出异常。错误只能从可失败 cast 产生，或者通过返回 `T?` / 错误 enum 表达。
+- **没有 `Result<T, E>`**：用 enum + match 模拟（见上）。
+- **没有 `finally`**：`try/catch` 没有 finally 子句。资源清理靠 [所有权系统](/zh/docs/06-ownership)的 `@destroy` 自动析构。
+
+## 小结
+
+- 错误来源：可失败 cast 产生 `T?`，成功是值，失败是 `null`
+- 三种处理方式：
+  - `?:` 兜底 -- 有默认值时最简洁
+  - `?` 传播（函数级）-- 把错误抛给调用方
+  - `?` 传播（try 内）+ `try/catch` -- 捕获并恢复
+- `try/catch` 支持多 catch 子句，按类型匹配
+- `?` 是 try/catch 的触发器：不带 `?` 的 cast 不会跳到 catch
+- 没有 `??`、throw/raise、`Result<T,E>`、`finally`
+- 自定义错误用 enum + match 模拟
+
+下一章：泛型与 Concepts -- concept 约束的泛型函数和 struct。
+
+## Related
+
+- [05 Optional 类型与 ?](/zh/docs/05-optional) - Optional 基础和 `field?` 安全访问
+- [04 类型转换](/zh/docs/04-type-conversion) - 可失败 cast 的完整语义
+- [08 模式匹配](/zh/docs/08-pattern-matching) - match 和穷尽性检查
+- [06 所有权基础](/zh/docs/06-ownership) - `@destroy` 自动析构替代 finally
+- Type Conversion - 完整 cast 矩阵

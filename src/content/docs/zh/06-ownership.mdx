@@ -1,0 +1,238 @@
+---
+title: "06 所有权基础"
+order: 60
+section: "semantics"
+locale: "zh"
+---
+这一章讲 Kinglet 的所有权模型：赋值和传参时值怎么处理、借用怎么工作、`@init`/`@destroy` 怎么标记资源类型。详细的状态矩阵和已知限制见 Ownership System。
+
+## 三层类型分类
+
+Kinglet 把所有类型按所有权行为分成三层：
+
+**Scalar（标量）** -- 赋值和传参都是位拷贝，永远不转移：
+- `int`、`int32`、`int16` 等所有整数类型
+- `float`、`float32`、`double`、`float64`
+- `bool`、`char`、`byte`
+
+**Value type（值类型）** -- 赋值是拷贝（引用计数共享），传参也是拷贝（调用者不丢失所有权）：
+- `string`
+- `T[]`（动态数组）
+- `\{K: V\}`（map）
+- 没有 `@destroy` 的 struct
+
+**Resource type（资源类型）** -- 赋值和传参都转移所有权，move-only：
+- 声明了 `@destroy` 的用户 struct
+- 内建/标准库资源类型，例如 `fs::file`（第 12 章）
+
+一个用户自定义 struct 是不是 resource type，只看它有没有 `@destroy`。标准库也可以提供内建资源类型；例如 `fs::file` 是文件句柄资源，按值传参会转移所有权。
+
+```kl
+struct Point {     // value type -- 没有 @destroy
+  int x;
+  int y;
+}
+
+struct File {      // resource type -- 有 @destroy
+  int fd;
+  @destroy { }
+}
+```
+
+## 赋值行为
+
+### Scalar：位拷贝
+
+```kl
+using io;
+int main() {
+  int a = 42;
+  int b = a;        // 位拷贝
+  b = 99;
+  io::out("{} {}\n", a, b);   // 42 99 -- a 不受影响
+  return 0;
+}
+```
+
+### Value type：引用计数拷贝
+
+Value type 的赋值是引用计数共享（retain），不是深拷贝。两个变量共享底层堆数据，但因为 Kinglet 没有可变引用来透过共享修改底层数据，所以在语言层面表现为"拷贝"：
+
+```kl
+using io;
+int main() {
+  int[] a = [1, 2, 3];
+  int[] b = a;      // 共享底层数组
+  b.push(4);
+  io::out("{} {}\n", a.len(), b.len());   // 4 4 -- 共享同一份数据
+  return 0;
+}
+```
+
+> **注意**：struct 赋值同样是引用计数共享，修改 `b.x` 也会影响 `a.x`。这不是"深拷贝"--当前实现用引用计数管理堆对象的生命周期。详见 [07 值表示简介](/zh/docs/07-value-representation)。
+
+### Resource type：转移
+
+Resource type 的赋值是转移（move），源变量失效：
+
+```kl
+using io;
+struct Tag {
+  int id;
+  @destroy { }
+}
+
+int main() {
+  Tag a = Tag { 1 };
+  Tag b = a;            // 转移：a 失效
+  io::out("{}\n", b.id); // 1
+  // io::out("{}\n", a.id);  // 编译错误：Variable 'a' was transferred
+  return 0;
+}
+```
+
+## 传参行为
+
+### Value type：拷贝传参，不转移
+
+Value type 传给 bare `T` 参数时，调用者**不丢失所有权**：
+
+```kl
+using io;
+void sink(string s) {
+  io::out("got: {}\n", s);
+}
+
+int main() {
+  string a = "hello";
+  sink(a);                    // 拷贝传参，a 仍可用
+  io::out("still: {}\n", a);  // hello
+  return 0;
+}
+```
+
+### Resource type：转移传参
+
+Resource type 传给 bare `T` 参数时，所有权转移到被调用函数，调用者失效：
+
+```kl
+using io;
+struct Tag {
+  int id;
+  @destroy { }
+}
+
+void consume(Tag t) {
+  io::out("consuming {}\n", t.id);
+}
+
+int main() {
+  Tag a = Tag { 42 };
+  consume(a);                 // 转移：a 失效
+  // io::out("{}\n", a.id);  // 编译错误：Variable 'a' was transferred
+  return 0;
+}
+```
+
+## 借用
+
+借用是**不转移所有权**的访问方式。类型写在参数位置：`const T&`（共享借用，只读）和 `T&`（独占借用，可写）。
+
+### 通过函数参数借用
+
+```kl
+using io;
+struct Tag {
+  int id;
+  @destroy { }
+}
+
+void inspect(const Tag& t) {   // 共享借用，不转移
+  io::out("inspecting {}\n", t.id);
+}
+
+void set_id(Tag& t, int new_id) {  // 独占借用，可写
+  t.id = new_id;
+}
+
+int main() {
+  Tag a = Tag { 42 };
+  inspect(a);              // 借用，a 仍可用
+  io::out("{}\n", a.id);   // 42
+  set_id(a, 99);           // 独占借用
+  io::out("{}\n", a.id);   // 99
+  return 0;
+}
+```
+
+借用参数的独占性规则：一个变量有活跃的独占借用时，禁止任何其他访问；有活跃的共享借用时，禁止修改，但允许多个共享借用共存。
+
+### 字段级借用路径
+
+借用按**路径**判断冲突，不是按整个变量。`p.left` 和 `p.right` 是不同路径，可以同时借用：
+
+```kl
+struct Pair {
+  int left;
+  int right;
+}
+
+int main() {
+  Pair p = Pair { 10, 20 };
+  const int& l = p.left;   // 共享借用 p.left
+  int& r = p.right;         // 独占借用 p.right（不冲突，路径不同）
+  r = 99;                    // OK
+  return 0;
+}
+```
+
+但 `p.left` 和 `p`（整体）冲突，因为借整个 `p` 覆盖了所有字段。
+
+### 借用生命周期
+
+借用绑定的生命周期是**词法作用域**--借用在所在作用域退出时释放，不是精确到最后一次使用的 NLL。函数参数借用则在函数返回时释放。
+
+## `@init` / `@destroy`
+
+struct 可以声明 `@init`（构造器）和 `@destroy`（析构器）：
+
+```kl
+struct File {
+  private int fd;
+
+  @init(const string& path) {
+    fd = sys::open(path);
+  }
+  @destroy {
+    sys::close(fd);
+  }
+}
+```
+
+- `@destroy` 的存在使 struct 成为 resource type，改变赋值和传参语义。
+- `@init`/`@destroy` 都是可选的。不写就用编译器生成的默认版本。
+- 声明了 `@destroy` 的 struct 在作用域退出时按声明逆序自动析构。
+
+> **当前实现状态**（canon `66d4396`）：`@destroy` 的函数体**会执行** -- 作用域退出时按声明逆序调用（PR #119 修复）。`@init` 的函数体**不执行** -- checker 识别 `@init` 用于判定 resource type，但后端不调用它；struct 字面量直接填充字段值。另外，resource type 变量被转移后，源变量在作用域退出时仍会触发 `@destroy`（double-destroy bug），详见 Ownership System。
+
+## `move()` 和闭包：暂不涉及
+
+- **`move()`**：设计意图是普通标准库函数（不需要新关键字），但目前标准库里没有实现。Resource type 的转移通过赋值和传参自然完成，不需要显式 `move()`。
+- **闭包**：语法尚未定案，捕获语义（copy/borrow/move）是延后的问题。本章不涉及。
+
+## 小结
+
+- 三层类型：scalar（位拷贝）、value type（引用计数拷贝）、resource type（转移）。
+- Resource type = 声明了 `@destroy` 的用户 struct，或标准库定义的资源类型（例如 `fs::file`）；赋值和传参都转移所有权。
+- Value type 传参不转移，调用者保留所有权。
+- 借用 `const T&`/`T&` 不转移所有权，按路径判断独占性冲突，生命周期是词法作用域。
+- `@destroy` 声明影响类型分类，body 在作用域退出时执行；`@init` body 当前不执行。转移后的变量仍会触发 double-destroy。
+- `move()` 未实现，闭包语义待定。
+
+下一章：值表示简介--什么类型内联在 64 位值里、什么走堆。
+
+## Related
+
+- Ownership System - 完整状态矩阵和已知限制
+- [07 值表示简介](/zh/docs/07-value-representation) - 内联 vs 堆分配决定引用计数的运行时基础
+- [03 复合类型](/zh/docs/03-compound-types) - struct 声明语法

@@ -1,0 +1,140 @@
+---
+title: "01 — 环境与工具链"
+order: 10
+section: "start"
+locale: "zh"
+---
+这一章带你把第一个 Kinglet 程序跑起来。Kinglet 目前只有一个可用的实现——C++ 编写的 bootstrap 编译器，`kinglet` 命令既是编译器也是构建工具的入口。
+
+## 单文件模式
+
+不需要项目结构，直接把 `kinglet` 指向一个 `.kl` 源文件就能编译并运行：
+
+```kl
+using io;
+
+int main() {
+  io::out("Hello, Kinglet!\n");
+  return 0;
+}
+```
+
+```bash
+kinglet hello.kl
+```
+
+```text
+Hello, Kinglet!
+```
+
+`kinglet <file.kl>` 是默认动作：编译成内存中的字节码，立刻在内置的解释执行路径上运行,不落地任何构建产物。适合写小片段、验证语法、跑一次性脚本。
+
+## 项目模式
+
+真实项目用 `kinglet init` 搭骨架：
+
+```bash
+kinglet init hello_demo
+```
+
+会生成：
+
+```text
+hello_demo/
+  kinglet.nest
+  src/main.kl
+```
+
+`kinglet.nest` 是项目清单，声明构建目标和产物位置：
+
+```text
+project "hello_demo" version "0.1.0"
+
+target app {
+  kind    = "binary"
+  sources = ["src/"]
+}
+
+build {
+  default = "app"
+  cache = ".kinglet/cache"
+  out = ".kinglet/out"
+}
+```
+
+`src/main.kl` 是脚手架生成的入口：
+
+```kl
+export module app;
+using io;
+
+int main() {
+  io::out.line("Hello from {}!", "hello_demo");
+  return 0;
+}
+```
+
+在项目目录里跑构建：
+
+```bash
+cd hello_demo
+kinglet build
+```
+
+产物落在 `.kinglet/out/app`（原生可执行文件）。直接运行它：
+
+```bash
+./.kinglet/out/app
+```
+
+```text
+Hello from hello_demo!
+```
+
+注意这里用的是 `io::out.line(...)`——这是模板方法形式,带自动换行。上一节单文件例子里的 `io::out("...\n")` 是直接把整段字符串（含转义的 `\n`）传给 `out` 的调用形式。两种写法都能用,教程后续统一用 `io::out("...\n", ...)` 这种显式换行的写法,方便控制格式字符串里的占位符数量。
+
+## `using io;` 是必须的
+
+`io::out` 系列输出方法要求当前文件先执行 `using io;`（或 `using namespace io;` 效果相同）。漏掉这一行,编译期就会报错——这是刻意设计,输出能力不是编译器隐式可用的全局函数,而是显式引入的命名空间成员。
+
+## 命令一览
+
+`kinglet -h` 列出的顶层用法:
+
+```text
+kinglet <file.kl> [args...]         Compile and run (default)
+kinglet init [path]                 Scaffold a new project
+kinglet build [--quiet] [root]      Build the project
+kinglet run [<file.kl> | args...]   Run the built binary or a source file
+kinglet prune [--all] [-n]          Prune unreferenced Klos objects
+kinglet fmt [--check] [paths...]    Format sources (CI check or write)
+```
+
+调试期常用的诊断模式（不生成产物,只输出中间表示到标准输出）:
+
+```text
+--check     只做类型检查,不运行
+--tokens    打印词法 token 流
+--ast       打印语法树
+--ir        打印 KIR（编译器内部中间表示）
+```
+
+比如快速检查一段代码是否类型正确,不用真的跑起来:
+
+```bash
+kinglet --check hello.kl
+```
+
+## 小结
+
+- 单文件脚本用 `kinglet file.kl` 直接跑,适合练习和验证语法。
+- 真实项目用 `kinglet init` + `kinglet build`,靠 `kinglet.nest` 声明构建目标。
+- `using io;` 是使用 `io::out` 输出能力的前提,不是隐式可用的。
+- `--check`/`--ast`/`--ir` 这几个诊断模式在后续章节遇到"这段代码到底被编译器怎么理解"的疑问时很有用。
+
+下一章开始写实际的语法:变量、字面量、基础标量类型。
+
+## Related
+
+- Home
+- [02 — 基础语法](/zh/docs/02-basic-syntax)

@@ -1,52 +1,53 @@
 ---
-// Footer for the marketing home shell (uses home.css classes).
+import { t, defaultLocale, type Locale } from '../i18n';
+const locale = (Astro.currentLocale ?? defaultLocale) as Locale;
 const year = 2026;
+const homePrefix = locale === 'zh' ? '/zh' : '';
 ---
 <footer class="site-footer">
   <div class="shell footer-grid">
     <div class="footer-cols">
       <div>
-        <h4>Try</h4>
+        <h4>{t('footer.try', locale)}</h4>
         <ul>
-          <li><a href="/#get-started">Get started</a></li>
-          <li><a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">Examples ↗</a></li>
+          <li><a class="footer-soon" aria-disabled="true" title={t('nav.soon', locale)}>{t('footer.try.playground', locale)}</a></li>
+          <li><a href="https://github.com/kinglet-lang/bootstrap/tree/canon/tests/exec/cases">{t('footer.try.examples', locale)}</a></li>
         </ul>
       </div>
       <div>
-        <h4>Docs</h4>
+        <h4>{t('footer.docs', locale)}</h4>
         <ul>
-          <li><a href="/docs">Tutorials</a></li>
-          <li><a href="https://github.com/kinglet-lang/bootstrap#readme">CLI ↗</a></li>
+          <li><a href={`${homePrefix}/docs`}>{t('footer.docs.tutorials', locale)}</a></li>
+          <li><a href="https://github.com/kinglet-lang/ADRs">{t('footer.docs.adr', locale)}</a></li>
         </ul>
       </div>
       <div>
-        <h4>Project</h4>
+        <h4>{t('footer.project', locale)}</h4>
         <ul>
-          <li><a href="https://github.com/kinglet-lang/bootstrap">Bootstrap compiler ↗</a></li>
-          <li><a href="https://github.com/kinglet-lang/bootstrap/releases">Releases ↗</a></li>
-          <li><a href="https://github.com/kinglet-lang/ADRs">ADRs ↗</a></li>
+          <li><a href="https://github.com/kinglet-lang/bootstrap">{t('footer.project.compiler', locale)}</a></li>
+          <li><a href="https://github.com/kinglet-lang/bootstrap/releases">{t('footer.project.releases', locale)}</a></li>
         </ul>
       </div>
       <div>
-        <h4>Ecosystem</h4>
+        <h4>{t('footer.ecosystem', locale)}</h4>
         <ul>
-          <li><a href="https://github.com/kinglet-lang/perch">Perch — editor ↗</a></li>
-          <li><a href="https://github.com/kinglet-lang/crest">Crest — theme ↗</a></li>
+          <li><a href="https://github.com/kinglet-lang/perch">{t('footer.ecosystem.perch', locale)}</a></li>
+          <li><a href="https://github.com/kinglet-lang/crest">{t('footer.ecosystem.crest', locale)}</a></li>
         </ul>
       </div>
       <div>
-        <h4>Community</h4>
+        <h4>{t('footer.community', locale)}</h4>
         <ul>
-          <li><a href="https://github.com/kinglet-lang">GitHub org ↗</a></li>
-          <li><a href="https://github.com/kinglet-lang/bootstrap/discussions">Discussions ↗</a></li>
-          <li><a href="/news">News</a></li>
-          <li><a href="/blog">Blog</a></li>
+          <li><a href="https://github.com/kinglet-lang">{t('footer.community.github', locale)}</a></li>
+          <li><a href="https://github.com/kinglet-lang/bootstrap/discussions">{t('footer.community.discussions', locale)}</a></li>
+          <li><a href={`${homePrefix}/news`}>{t('footer.community.news', locale)}</a></li>
+          <li><a href={`${homePrefix}/blog`}>{t('footer.community.blog', locale)}</a></li>
         </ul>
       </div>
     </div>
   </div>
 
   <div class="shell footer-meta">
-    <p>&copy; {year} Kinglet contributors.</p>
+    <p>{t('footer.copyright', locale, { year })}</p>
   </div>
 </footer>

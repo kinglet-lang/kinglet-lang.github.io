@@ -1,0 +1,306 @@
+---
+title: "05 Optional 类型与 ?"
+order: 50
+section: "types"
+locale: "zh"
+---
+前几章里 `int?` 已经出现过好几次：可失败 cast 的结果类型、`?:` 兜底的返回类型。这一章把 Optional 类型、`field?` 安全访问、`?:` 兜底和 `?` 传播放到一起讲清楚。
+
+## Optional 类型：T?
+
+任何类型后面加 `?` 就是 Optional 版本：`int?`、`string?`、`Node?`。Optional 类型的值要么是底层类型的实际值，要么是 `null`。
+
+不带初始化器声明时，Optional 变量默认为 `null`（Optional 是 defaultable 类型，参见第 03 章）：
+
+```kl
+int? a;              // a 是 null
+int? b = 42;         // b 是 42
+int? c = null;       // 显式写 null 也行
+```
+
+`null` 只能赋给 Optional 类型或 `string`（`string(null)` 输出字面量 `"null"`，这是展示语义，不是"string 可以为空"）。
+
+### 与 null 比较
+
+Optional 值可以直接和 `null` 比较：
+
+```kl
+using io;
+int main() {
+  int? a;
+  if a == null {
+    io::out("a is null\n");      // 打印这条
+  }
+
+  int? b = 42;
+  if b != null {
+    io::out("b has value\n");    // 打印这条
+  }
+  return 0;
+}
+```
+
+### match 解构
+
+Optional 也可以在 `match` 里分 null 和有值两种情况：
+
+```kl
+using io;
+int main() {
+  int? a = 42;
+  int r = a match {
+    null => -1,
+    let v => v,       // 绑定实际值
+  };
+  io::out("{}\n", r);   // 42
+  return 0;
+}
+```
+
+## ?: 兜底
+
+`?:` 是 null/error coalescing 操作符。左边的值如果是 null（或错误状态），就用右边的 fallback。
+
+### 对 Optional 值：解包到 T
+
+当 `?:` 的左边是一个普通 Optional 值（不是可失败 cast），结果类型是**底层类型 T**，不是 `T?`：
+
+```kl
+using io;
+int main() {
+  int? a = 42;
+  int x = a ?: -1;       // OK -- a 是 Optional, ?: 解包到 int
+  io::out("{}\n", x);     // 42
+
+  int? b;                 // null
+  int y = b ?: -1;        // OK -- b 是 null, 用 fallback -1
+  io::out("{}\n", y);     // -1
+  return 0;
+}
+```
+
+### 对可失败 cast：结果始终是 T?
+
+当 `?:` 的左边是一个可失败 cast（如 `int("abc")`），结果类型始终是 `T?`，即使 fallback 给的是裸 `T` 值。这条规则在第 04 章讲过，这里重申：
+
+```kl
+int? a = int("123") ?: -1;    // OK -- 结果是 int?
+int? b = int("xyz") ?: -1;    // OK -- 结果是 int?, 值是 -1
+int  c = int("42") ?: -1;     // 编译错误：Cannot assign int? to variable of type int.
+```
+
+区别在于：`?:` 知道左边来自一次可失败操作，保留 Optional 包装让调用方明确意识到这条路径。而对普通 Optional 变量，`?:` 只是解包，结果就是底层类型。
+
+### 链式 ?:
+
+`?:` 可以链式使用，依次尝试多个可失败操作：
+
+```kl
+using io;
+int main() {
+  string s1 = "bad";
+  string s2 = "7";
+  int? d = int(s1) ?: int(s2) ?: -1;   // 第一个失败, 第二个成功 -> 7
+  io::out("{}\n", d);
+  return 0;
+}
+```
+
+### `?: let err =>` 绑定错误
+
+当 `?:` 左边是可失败 cast 时，可以用 `let err =>` 绑定 `CastError`：
+
+```kl
+using io;
+int main() {
+  int? a = int("bad") ?: let err => -1;
+  io::out("{}\n", a);   // -1
+  return 0;
+}
+```
+
+`err` 的类型是 `CastError`，可以在 fallback 表达式里使用。
+
+## field? 安全访问
+
+当 struct 的某个字段是 Optional 类型时，可以用 `field?` 语法安全访问--如果字段为 null，不会报错，而是产生一个 null 值。
+
+```kl
+using io;
+struct HasOpt {
+  int x;
+  int? maybe;
+}
+
+int main() {
+  HasOpt s { 10, 42 };
+  int? a = s.maybe?;          // field? 解包 Optional 字段
+  io::out("{}\n", a ?: -1);    // 42
+
+  HasOpt t { 20, null };
+  int? b = t.maybe?;          // maybe 是 null, field? 产生 null
+  io::out("{}\n", b ?: -1);    // -1
+  return 0;
+}
+```
+
+`field?` 只能用在 Optional 字段上。对非 Optional 字段用 `?` 会编译报错：
+
+```kl
+HasOpt s { 10, 42 };
+int a = s.x?;    // 编译错误：Cannot use '?' on non-Optional field 'x'.
+```
+
+### 不带 ? 访问 Optional 字段
+
+不带 `?` 访问 Optional 字段返回字段本身的 `T?` 类型：
+
+```kl
+int? a = s.maybe;    // OK -- a 是 int?, 可能是 null
+```
+
+但如果 Optional 字段是 struct 类型（如 `Node?`），**不带 `?` 就不能继续访问其字段**，因为编译器看到的是 `Node?`（Optional），不是 `Node`（struct）：
+
+```kl
+struct Node {
+  int value;
+  Node? next;
+}
+
+Node n { 1, null };
+int? v = n.next.value;    // 编译错误：Cannot access field on non-struct type.
+```
+
+必须用 `field?` 先解包成 `Node`，才能继续 `.value`。
+
+### 链式 field? 访问
+
+`field?` 可以链式调用，处理链表等递归结构：
+
+```kl
+using io;
+struct node {
+  int value;
+  node? next;
+}
+
+int main() {
+  node n2 { 2, null };
+  node n1 { 1, n2 };
+
+  int a = n1.next?.value;          // n1.next 解包为 n2, .value = 2
+  io::out("{}\n", a);               // 2
+  return 0;
+}
+```
+
+### ⚠️ field? 链的安全边界
+
+`field?` 在运行时如果遇到 null，会推入一个 null 值并继续执行后续的字段访问。**编译器把 `field?` 的结果类型当作已解包的 T**，但如果中间环节是 null，后续 `.field` 读到的是不确定值。
+
+**安全用法**：在 `field?` 链的末尾用 `?:` 兜底。`?:` 能捕获链中产生的 null 值：
+
+```kl
+using io;
+struct node {
+  int value;
+  node? next;
+}
+
+int main() {
+  node n1 { 1, null };
+  // n1.next 是 null。链中产生 null, ?: 捕获, 返回 -1
+  int v = n1.next?.value ?: -1;
+  io::out("{}\n", v);   // -1
+  return 0;
+}
+```
+
+**不安全用法**：`field?` 链不带 `?:`，直接赋值给非 Optional 变量。如果链中间有 null，读到的是不确定值：
+
+```kl
+using io;
+struct node {
+  int value;
+  node? next;
+}
+
+int main() {
+  node n1 { 1, null };
+  int v = n1.next?.next?.value;    // 编译通过, 但运行时 v 是不确定值
+  io::out("{}\n", v);               // 不确定值, 不是 0
+  return 0;
+}
+```
+
+**原则：`field?` 链要么存入 `T?` 变量再处理，要么末尾接 `?:` 兜底。不要直接赋给非 Optional 变量。**
+
+## postfix ? 传播
+
+postfix `?` 用在可失败操作后面，把失败传播出去。传播方式取决于上下文：
+
+### 函数级传播：返回 null
+
+在普通函数体里，`expr?` 如果遇到失败，函数立即返回 `null`：
+
+```kl
+using io;
+int? safe_parse(string s) {
+  return int(s)?;    // cast 失败时函数返回 null
+}
+
+int main() {
+  int? a = safe_parse("42") ?: -1;
+  io::out("{}\n", a);   // 42
+  int? b = safe_parse("bad") ?: -1;
+  io::out("{}\n", b);   // -1
+  return 0;
+}
+```
+
+### try/catch 内传播：跳到 catch
+
+`?` 在 `try` 块里时，失败会跳到 `catch`，而不是返回 `null`：
+
+```kl
+using io;
+int main() {
+  int n;
+  try {
+    n = int("bad")?;              // cast 失败, ? 传播到 catch
+  } catch (let ex: CastError) {
+    n = -99;
+  }
+  io::out("{}\n", n);   // -99
+
+  int m;
+  try {
+    m = int("42")?;                // cast 成功, ? 不触发
+  } catch (let ex: CastError) {
+    m = -99;
+  }
+  io::out("{}\n", m);   // 42
+  return 0;
+}
+```
+
+`catch` 绑定的变量类型是 `CastError`。成功路径不执行 catch 块。
+
+> **注意**：Kinglet 没有 `??` 操作符。null 传播用的是 postfix `?`（单个问号），兜底用的是 `?:`（问号冒号）。写成 `??` 会被 lexer 拒绝。
+
+## 小结
+
+- `T?` 是 Optional 类型，值为 `T` 或 `null`。不带初始化器声明时默认为 `null`。
+- `?:` 兜底：对普通 Optional 变量解包为 `T`；对可失败 cast 结果始终为 `T?`。
+- `field?` 安全访问 Optional 字段，解包为底层类型。只能用在 Optional 字段上。
+- `field?` 链式访问可以处理递归结构，但**末尾必须接 `?:` 兜底**才能安全处理中间环节为 null 的情况。
+- postfix `?` 传播：函数体内返回 `null`，`try` 块内跳到 `catch`。
+- 没有 `??` 操作符；传播用 `?`，兜底用 `?:`。
+
+下一章：所有权基础--借用、move、自动析构。
+
+## Related
+
+- [04 类型转换](/zh/docs/04-type-conversion) - 可失败 cast 与 `?:` 的基础
+- Type Conversion - 完整 cast 矩阵和 `?:` 语义细节
+- 下一章：06 所有权基础

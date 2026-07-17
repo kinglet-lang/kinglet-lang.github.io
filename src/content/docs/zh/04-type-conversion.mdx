@@ -1,0 +1,135 @@
+---
+title: "04 类型转换"
+order: 40
+section: "types"
+locale: "zh"
+---
+Kinglet 的类型转换是"显式为主，隐式极窄"的模型：想把一个值变成另一个类型，写成函数调用的样子；没有 `as` 关键字，也没有 C 风格的 `(T)x`。这一章讲怎么用,更完整的矩阵和边界见 Type Conversion。
+
+## 显式转换：函数调用形态
+
+```kl
+float f = 3.9;
+int i = int(f);
+io::out("{}\n", i);      // 3（截断，不是四舍五入）
+string s = string(i);
+io::out("{}\n", s);      // 3
+```
+
+可用的转换函数是 `int(x)`、`float(x)`、`string(x)`、`char(x)`、`byte(x)`--只有这五个标量目标,没有更宽的固定宽度目标（比如没有 `int64(x)` 这种写法,`int` 本身就是 64 位）。
+
+数值、char、byte、bool、enum 之间互转基本都是"合法且不会失败"，比如：
+
+```kl
+enum Suit { Hearts, Spades, Clubs, Diamonds }
+
+int main() {
+  Suit s = Suit::Hearts;
+  io::out("{}\n", int(s));    // 0（variant 的序号）
+  io::out("{}\n", float(s));  // 0
+
+  bool t = true;
+  io::out("{}\n", int(t));     // 1
+  io::out("{}\n", string(t));  // true
+  return 0;
+}
+```
+
+也有故意收窄、不开放的组合，比如 `char -> float`、`bool -> char/byte`、`enum -> string`。不是漏做的能力，是设计上认为这些转换没有清晰意图。完整矩阵见 Type Conversion。
+
+## 可失败转换：`string` 是特例
+
+从运行时 `string` 转数值或字符可能失败（比如 `int("abc")`），这类转换编译器强制要求处理：
+
+```kl
+string s = "42";
+int z = int(s);   // 编译错误：Fallible cast from string to int must be
+                   // handled with '?:' or postfix '?'.
+```
+
+处理方式是 `?:` 提供 fallback：
+
+```kl
+int? a = int("123") ?: -1;
+io::out("a = {}\n", a);   // 123
+int? b = int("xyz") ?: -1;
+io::out("b = {}\n", b);   // -1
+```
+
+**这里最容易踩的坑：`?:` 表达式的结果类型永远是 `T?`，就算 fallback 给的是裸 `T` 值,也不会把类型收窄回 `T`。** 也就是说下面这样写会编译错误：
+
+```kl
+int x = int("42") ?: -1;   // 编译错误：Cannot assign int? to variable of type int.
+```
+
+必须声明成 `int?`。这条规则容易让人想当然--直觉上"都兜底了应该就是非空值了"，但编译器保留 `Optional` 包装是为了让调用方明确知道这条路径来自一次可失败操作。`?:` 后面也可以用 `let err => ...` 形式绑定失败原因（`CastError`），语义一样。
+
+## 隐式转换：字面量初始化器与二元运算
+
+### 变量声明中的字面量宽度推断
+
+普通赋值不会帮你做位宽转换,不管是变宽还是收窄：
+
+```kl
+int64 b = 2i64;
+int32 d = b;   // 编译错误：Cannot assign int to variable of type int32.
+```
+
+但有一个例外：**当初始化器是一个不带后缀的整数字面量、且声明类型是显式的整数类型时，字面量会自动采用目标类型的宽度**，只要值能装得下：
+
+```kl
+int32 i = 1;        // OK -- 字面量 1 采用 int32 宽度
+uint16 port = 443;  // OK -- 443 装得进 uint16
+byte b = 10;        // OK
+```
+
+超出范围会编译报错：
+
+```kl
+int8 x = 300;       // 编译错误：Integer literal out of range for type 'int8'.
+```
+
+这个规则只对**裸字面量**生效。带后缀的字面量保持后缀指定的类型不变，复合表达式里的字面量仍然走默认 `int` 推断：
+
+```kl
+int32 i = 1i64;     // 编译错误 -- 后缀明确说了是 int64，不收窄
+int32 j = 1 + 2;    // 编译错误 -- 1 + 2 是复合表达式，推断为 int，不收窄
+int64 wide = 5;
+int32 narrow = wide;  // 编译错误 -- wide 是变量不是字面量
+```
+
+`auto` 不受影响--没有目标类型给字面量采用，所以 `auto x = 1;` 仍然是 `int`。
+
+### 二元运算中的字面量提升
+
+隐式转换的另一个场景是二元数值运算里的字面量提升--没有类型后缀的字面量会自动匹配另一侧已定型操作数的宽度：
+
+```kl
+int32 a = 1i32;
+int32 c = a + 2;   // 字面量 2 提升为 int32，结果 3
+io::out("{}\n", c);
+```
+
+两个都是已定型操作数、且宽度不同时，编译器不会帮你选一个宽度，要求显式转换：
+
+```kl
+int32 a = 1i32;
+int64 b = 2i64;
+int64 c = int(a) + b;   // 显式转换 a 之后再运算，结果 3
+```
+
+## 小结
+
+- 转换写成 `TypeName(expr)`，可用目标只有 `int`/`float`/`string`/`char`/`byte`。
+- 大多数标量间转换是无失败的；`string -> 数值/char/byte` 是可失败的，必须用 `?:` 或 postfix `?` 处理。
+- `?:` 处理可失败转换后，结果类型永远是 `T?`，声明变量时要带 `?`，这是最容易写错的地方。
+- 赋值不做隐式位宽转换；例外是变量声明中**裸无后缀整数字面量**会采用显式目标类型宽度（值需在范围内）。`auto` 仍推断 `int`。
+- 二元运算中无后缀字面量会匹配另一侧操作数的宽度。
+
+下一章：Optional 类型与 `?`（在这一章的 `int?` 基础上，讲清楚链式访问和空值传播的边界）。
+
+## Related
+
+- [03 复合类型](/zh/docs/03-compound-types)
+- Type Conversion - 完整 8×5 cast 矩阵和已知限制
+- 下一章：Optional 类型与 `?`

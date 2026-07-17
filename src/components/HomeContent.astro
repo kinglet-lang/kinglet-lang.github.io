@@ -1,0 +1,213 @@
+---
+import { t, defaultLocale, type Locale } from '../i18n';
+const locale = (Astro.currentLocale ?? defaultLocale) as Locale;
+const docsHref = locale === 'zh' ? '/zh/docs' : '/docs';
+const runLabel = t('editor.run', locale);
+const copyLabel = t('editor.copy', locale);
+const previewLabel = t('editor.preview', locale);
+---
+<main>
+  <section class="hero">
+    <div class="shell hero-grid">
+      <p class="eyebrow hero-stagger" style="--stagger:0">{t('hero.eyebrow', locale)}</p>
+
+      <h1 class="hero-stagger" style="--stagger:1">{t('hero.headline.a', locale)} <em>{t('hero.headline.b', locale)}</em></h1>
+
+      <div class="hero-actions hero-stagger" style="--stagger:2">
+        <button class="button" type="button" disabled aria-disabled="true">{t('hero.cta.primary', locale)}</button>
+        <a class="text-link" href={docsHref}>{t('hero.cta.secondary', locale)}</a>
+      </div>
+
+      <div class="hero-editor hero-stagger" style="--stagger:3" aria-label="Kinglet source example">
+        <div class="hero-editor__head">
+          <span>shape.kl</span>
+          <div class="hero-editor__actions">
+            <button type="button" class="hero-editor__btn" data-run="hero" data-target="hero-output" data-label-run={runLabel} data-label-hide={t('editor.hide', locale)}>{runLabel}</button>
+            <button type="button" class="hero-editor__btn" id="hero-copy" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)} aria-label={copyLabel}><span id="hero-copy-label">{copyLabel}</span></button>
+          </div>
+        </div>
+<pre id="hero-code" data-stdout="3.14"><code><span class="kw">using</span> io;
+
+<span class="kw">enum</span> <span class="ty">Shape</span> {'{'}
+  <span class="ty">Circle</span>(<span class="ty">float</span>),
+  <span class="ty">Rect</span>(<span class="ty">float</span>, <span class="ty">float</span>),
+{'}'}
+
+<span class="ty">float</span> <span class="fn">area</span>(<span class="ty">Shape</span> s) {'{'}
+  <span class="kw">return</span> s <span class="kw">match</span> {'{'}
+    <span class="ty">Shape</span>::<span class="ty">Circle</span>(<span class="kw">let</span> r) ={'>'} <span class="num">3.14</span> * r * r,
+    <span class="ty">Shape</span>::<span class="ty">Rect</span>(<span class="kw">let</span> w, <span class="kw">let</span> h) ={'>'} w * h,
+  {'}'};
+{'}'}
+
+<span class="ty">int</span> <span class="fn">main</span>() {'{'}
+  <span class="ty">Shape</span> c = <span class="ty">Shape</span>::<span class="ty">Circle</span>(<span class="num">1.0</span>);
+  io::out.<span class="fn">line</span>(<span class="fn">area</span>(c));
+  <span class="kw">return</span> <span class="num">0</span>;
+{'}'}<span class="caret" aria-hidden="true"></span></code></pre>
+        <div class="hero-editor__output" id="hero-output" hidden aria-live="polite">
+          <div class="hero-editor__output-head">
+            <span>$ kinglet shape.kl</span>
+            <span class="hero-editor__preview-tag">{previewLabel}</span>
+          </div>
+<pre class="hero-editor__stdout"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="language" id="language">
+    <div class="shell section-grid">
+      <header class="section-intro">
+        <p class="section-number">{t('section.language.eyebrow', locale)}</p>
+        <h2>{t('section.language.h2', locale)}</h2>
+        <p>{t('section.language.lead', locale)}</p>
+      </header>
+      <div class="feature-list">
+        <article>
+          <div><h3>{t('feature.ownership.title', locale)}</h3></div>
+          <div><p>{t('feature.ownership.body', locale)}</p></div>
+        </article>
+        <article>
+          <div><h3>{t('feature.adt.title', locale)}</h3></div>
+          <div><p>{t('feature.adt.body', locale)}</p></div>
+        </article>
+        <article>
+          <div><h3>{t('feature.caps.title', locale)}</h3></div>
+          <div><p>{t('feature.caps.body', locale)}</p></div>
+        </article>
+        <article>
+          <div><h3>{t('feature.native.title', locale)}</h3></div>
+          <div><p>{t('feature.native.body', locale)}</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="code-section" aria-labelledby="code-title">
+    <div class="shell code-grid">
+      <div class="code-copy">
+        <p class="section-number">{t('section.code.eyebrow', locale)}</p>
+        <h2 id="code-title">{t('section.code.h2', locale)}</h2>
+        <p>{t('section.code.lead', locale)}</p>
+        <a href={docsHref}>{t('section.code.cta', locale)}</a>
+      </div>
+      <div class="editor" aria-label="Kinglet code example">
+        <div class="editor-head">
+          <span>read.kl</span>
+          <div class="hero-editor__actions">
+            <button type="button" class="hero-editor__btn" data-run="code" data-target="code-output" data-label-run={runLabel} data-label-hide={t('editor.hide', locale)}>{runLabel}</button>
+            <button type="button" class="hero-editor__btn" id="code-copy" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)} aria-label={copyLabel}><span id="code-copy-label">{copyLabel}</span></button>
+          </div>
+        </div>
+<pre id="code-block" data-stdout="a = 420&#10;n = -99"><code><span class="kw">using</span> io;
+
+<span class="ty">int</span>? <span class="fn">parse</span>(<span class="ty">string</span> s) {'{'}
+  <span class="kw">return</span> <span class="ty">int</span>(s)? * <span class="num">10</span>;
+{'}'}
+
+<span class="ty">int</span> <span class="fn">main</span>() {'{'}
+  <span class="ty">int</span>? a = <span class="fn">parse</span>(<span class="num">"42"</span>) ?: <span class="num">-1</span>;
+  io::out.<span class="fn">line</span>(<span class="num">"a = {'{}'}"</span>, a);
+
+  <span class="ty">int</span> n;
+  <span class="kw">try</span> {'{'}
+    n = <span class="ty">int</span>(<span class="num">"bad"</span>)?;
+  {'}'} <span class="kw">catch</span> (<span class="kw">let</span> ex: <span class="ty">CastError</span>) {'{'}
+    n = <span class="num">-99</span>;
+  {'}'}
+  io::out.<span class="fn">line</span>(<span class="num">"n = {'{}'}"</span>, n);
+  <span class="kw">return</span> <span class="num">0</span>;
+{'}'}</code></pre>
+        <div class="hero-editor__output" id="code-output" hidden aria-live="polite">
+          <div class="hero-editor__output-head">
+            <span>$ kinglet read.kl</span>
+            <span class="hero-editor__preview-tag">{previewLabel}</span>
+          </div>
+<pre class="hero-editor__stdout"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="compiler" id="compiler">
+    <div class="shell section-grid">
+      <header class="section-intro">
+        <p class="section-number">{t('section.toolchain.eyebrow', locale)}</p>
+        <h2>{t('section.toolchain.h2', locale)}</h2>
+        <p>{t('section.toolchain.lead', locale)}</p>
+      </header>
+      <div class="pipeline" aria-label="Compilation pipeline">
+        <div><strong>{t('toolchain.step1.title', locale)}</strong><span>{t('toolchain.step1.detail', locale)}</span></div>
+        <div><strong>{t('toolchain.step2.title', locale)}</strong><span>{t('toolchain.step2.detail', locale)}</span></div>
+        <div><strong>{t('toolchain.step3.title', locale)}</strong><span>{t('toolchain.step3.detail', locale)}</span></div>
+        <div><strong>{t('toolchain.step4.title', locale)}</strong><span>{t('toolchain.step4.detail', locale)}</span></div>
+      </div>
+      <div class="project-links">
+        <a href="https://github.com/kinglet-lang/bootstrap"><span>{t('toolchain.link.source', locale)}</span><small>{t('toolchain.link.source.sub', locale)}</small></a>
+        <a href="https://github.com/kinglet-lang/bootstrap/releases"><span>{t('toolchain.link.releases', locale)}</span><small>{t('toolchain.link.releases.sub', locale)}</small></a>
+        <a href="https://github.com/kinglet-lang/ADRs"><span>{t('toolchain.link.adr', locale)}</span><small>{t('toolchain.link.adr.sub', locale)}</small></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="get-started" id="get-started">
+    <div class="shell start-grid">
+      <div>
+        <p class="section-number">{t('section.start.eyebrow', locale)}</p>
+        <h2>{t('section.start.h2', locale)}</h2>
+        <p>{t('section.start.lead', locale)}</p>
+      </div>
+      <div class="install-block">
+        <div class="install-command"><span id="prompt">$</span><code id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code><button id="copy" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span id="copy-label">{copyLabel}</span></button></div>
+        <p class="install-note">{t('start.windows.note', locale)} <code>irm https://kinglet-lang.org/install.ps1 | iex</code></p>
+        <div class="start-links">
+          <a href={docsHref}>{t('start.link.guide', locale)}</a>
+          <a href="https://github.com/kinglet-lang/bootstrap">{t('start.link.build', locale)}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script is:inline>
+(function () {
+  function bindCopy(btnId, sourceId) {
+    var btn = document.getElementById(btnId);
+    if (!btn) return;
+    var label = btn.querySelector('span') || btn;
+    var srcId = sourceId;
+    var copyText = btn.dataset.labelCopy || 'Copy';
+    var copiedText = btn.dataset.labelCopied || 'Copied';
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(srcId);
+      var text = el ? (el.textContent || '').trim() : '';
+      if (navigator.clipboard) navigator.clipboard.writeText(text);
+      label.textContent = copiedText;
+      window.setTimeout(function () { label.textContent = copyText; }, 1400);
+    });
+  }
+  bindCopy('copy', 'cmd');
+  bindCopy('hero-copy', 'hero-code');
+  bindCopy('code-copy', 'code-block');
+
+  var sources = { hero: document.getElementById('hero-code'), code: document.getElementById('code-block') };
+  document.querySelectorAll('[data-run]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var source = sources[btn.dataset.run];
+      var panel = document.getElementById(btn.dataset.target);
+      if (!source || !panel) return;
+      var stdout = source.getAttribute('data-stdout') || '';
+      var out = panel.querySelector('.hero-editor__stdout');
+      if (panel.hidden) {
+        out.textContent = stdout;
+        panel.hidden = false;
+        btn.textContent = btn.dataset.labelHide || 'Hide';
+      } else {
+        panel.hidden = true;
+        btn.textContent = btn.dataset.labelRun || 'Run';
+      }
+    });
+  });
+})();
+</script>

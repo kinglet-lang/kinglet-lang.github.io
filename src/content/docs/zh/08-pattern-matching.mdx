@@ -1,0 +1,290 @@
+---
+title: "08 模式匹配"
+order: 80
+section: "semantics"
+locale: "zh"
+---
+`match` 是 Kinglet 的核心控制流表达式之一，用于根据值的结构进行分支。它比 `if`/`else if` 链更表达力强：可以直接匹配字面量、解构 enum variant、拆解 struct 字段和数组元素，还支持 guard 条件和穷尽性检查。
+
+## 基本语法
+
+`match` 是**后缀表达式**，写在被匹配值后面：
+
+```kl
+值 match {
+  模式 => 表达式,
+  模式 => 表达式,
+}
+```
+
+每个 arm 用 `模式 => 表达式`，逗号分隔，末尾逗号可选。
+
+```kl
+using io;
+
+int main() {
+  int x = 2;
+  string s = x match {
+    0 => "zero",
+    1 => "one",
+    _ => "many",       // _ 是通配符，匹配所有其他值
+  };
+  io::out.line(s);     // many
+  return 0;
+}
+```
+
+## 模式种类
+
+Kinglet 支持 6 种模式：
+
+### 1. 通配符 `_`
+
+匹配任何值，不绑定变量。通常用作最后的兜底 arm：
+
+```kl
+x match {
+  0 => "zero",
+  _ => "nonzero",
+}
+```
+
+### 2. 绑定 `let name`
+
+匹配任何值，并把它绑定到一个变量名上，可以在 arm 表达式中使用：
+
+```kl
+x match {
+  let v => io::out.line("got {}", v),
+}
+```
+
+绑定可以和 guard 条件配合，实现条件分支：
+
+```kl
+using io;
+
+int main() {
+  int score = 85;
+  string g = score match {
+    let x if (x >= 90) => "A",
+    let x if (x >= 60) => "pass",
+    _ => "fail",
+  };
+  io::out.line(g);     // pass
+  return 0;
+}
+```
+
+`if (cond)` 是 guard：只有当条件为真时该 arm 才被选中。
+
+### 3. 字面量
+
+整数、字符串、布尔值都可以直接匹配：
+
+```kl
+int code = 404;
+string msg = code match {
+  200 => "OK",
+  404 => "Not Found",
+  500 => "Server Error",
+  _ => "Unknown",
+};
+```
+
+### 4. Enum variant
+
+enum 的每个 variant 可以作为模式。带 payload 的 variant 用括号解构：
+
+```kl
+using io;
+
+enum Shape {
+  Circle(float),
+  Rect(float, float),
+  None,
+}
+
+float area(Shape s) {
+  return s match {
+    Shape::Circle(let r) => 3.14 * r * r,
+    Shape::Rect(let w, let h) => w * h,
+    Shape::None => 0.0,
+  };
+}
+
+int main() {
+  Shape s = Shape::Circle(2.0);
+  io::out.line("{}", area(s));    // 12.56
+  return 0;
+}
+```
+
+Bare variant（不带 payload）直接用 `EnumType::VariantName`：
+
+```kl
+enum Color { Red, Green, Blue }
+
+string name(Color c) {
+  return c match {
+    Color::Red => "red",
+    Color::Green => "green",
+    Color::Blue => "blue",
+  };
+}
+```
+
+### 5. 数组模式 `[...]`
+
+匹配数组的前几个元素，剩余部分用 `...rest` 收集：
+
+```kl
+using io;
+
+int main() {
+  int[] nums = [10, 20, 30, 40];
+  auto [a, b, ...rest] = nums;
+  io::out.line("{} {} {}", a, b, rest.len());   // 10 20 2
+  return 0;
+}
+```
+
+`...rest` 是可选的。不用 `...rest` 时只检查前 N 个元素：
+
+```kl
+auto [first, second] = nums;    // first=10, second=20
+```
+
+### 6. Struct 模式
+
+按字段名解构 struct。两种写法：位置绑定和命名绑定：
+
+```kl
+using io;
+
+struct Point {
+  int x;
+  int y;
+}
+
+int main() {
+  Point p { 3, 4 };
+
+  // 位置绑定（按声明顺序）
+  p match {
+    Point { let x, let y } => io::out.line("({}, {})", x, y),
+  };
+
+  // 命名绑定（指定字段名）
+  p match {
+    Point { x: let px, y: let py } => io::out.line("{} {}", px, py),
+  };
+
+  // 部分匹配（只取部分字段，需要兜底 arm）
+  p match {
+    Point { x: let px } => io::out.line("x={}", px),
+    _ => io::out.line("other"),
+  };
+
+  return 0;
+}
+```
+
+## 穷尽性检查
+
+编译器对 `match` 做**穷尽性检查** -- 所有可能的情况都必须被覆盖，否则编译报错。
+
+### Enum 穷尽性
+
+enum match 必须覆盖所有 variant，或者用 `_` / `let` 兜底：
+
+```kl
+enum Color { Red, Green, Blue }
+
+// ✅ 全覆盖
+string s = c match {
+  Color::Red => "r",
+  Color::Green => "g",
+  Color::Blue => "b",
+};
+
+// ✅ 兜底
+string s = c match {
+  Color::Red => "r",
+  _ => "other",
+};
+
+// ❌ 缺少 Blue
+string s = c match {
+  Color::Red => "r",
+  Color::Green => "g",
+};
+// error: Non-exhaustive match. Missing variant(s): Blue.
+```
+
+### Bool 穷尽性
+
+bool match 必须覆盖 `true` 和 `false`：
+
+```kl
+string s = flag match {
+  true => "yes",
+  false => "no",
+};
+```
+
+### Nullable 穷尽性
+
+`T?` 类型的 match 必须覆盖 `null` 和非 null 两种情况：
+
+```kl
+int? opt = 42;
+int v = opt match {
+  null => -1,
+  let val => val,
+};
+```
+
+## match 作为表达式
+
+`match` 是表达式，有返回值。每个 arm 的 `=>` 右侧表达式的类型必须一致（或者可以统一到同一个类型）：
+
+```kl
+int sign(int x) {
+  return x match {
+    0 => 0,
+    let v if (v > 0) => 1,
+    _ => -1,
+  };
+}
+```
+
+如果 arm 的结果类型不一致，编译器会报错。
+
+## match 作为语句
+
+当不需要返回值时，`match` 也可以作为语句使用（arm 表达式类型为 `void`）：
+
+```kl
+shape match {
+  Shape::Circle(let r) => io::out.line("circle r={}", r),
+  Shape::Rect(let w, let h) => io::out.line("rect {}x{}", w, h),
+  Shape::None => io::out.line("none"),
+};
+```
+
+## 小结
+
+- `match` 是后缀表达式：`值 match \{ 模式 => 表达式, ... \}`
+- 6 种模式：`_`（通配符）、`let x`（绑定）、字面量、enum variant、数组 `[...]`、struct `\{ ... \}`
+- guard 条件：`let x if (cond) => ...`
+- 穷尽性检查：enum、bool、nullable 必须覆盖所有情况
+- match 既是表达式（有返回值），也可以当语句用
+
+下一章：错误处理 -- try/catch、`?` 传播、`?:` 兜底的系统讲解。
+
+## Related
+
+- [03 复合类型](/zh/docs/03-compound-types) - enum 和 struct 声明语法
+- [05 Optional 类型与 ?](/zh/docs/05-optional) - nullable match 的基础
+- [09 错误处理](/zh/docs/09-error-handling) - 下一章，try/catch 和 `?` 传播

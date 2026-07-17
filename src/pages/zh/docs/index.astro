@@ -1,10 +1,12 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import SiteHeader from '../../components/SiteHeader.astro';
-import SiteFooter from '../../components/SiteFooter.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SiteHeader from '../../../components/SiteHeader.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
 import { getCollection } from 'astro:content';
+import { t } from '../../../i18n';
 
-const entries = (await getCollection('docs', ({ data }) => !data.draft && (data.locale ?? 'en') === 'en'))
+const locale = 'zh';
+const entries = (await getCollection('docs', ({ data }) => !data.draft && (data.locale ?? 'en') === locale))
   .sort((a, b) => a.data.order - b.data.order);
 const bySection: Record<string, typeof entries> = {};
 for (const entry of entries) {
@@ -12,38 +14,39 @@ for (const entry of entries) {
   (bySection[key] ??= []).push(entry);
 }
 const sections = Object.entries(bySection);
+const idOf = (fullId: string) => fullId.replace(/^zh\//, '');
 ---
-<BaseLayout title="Docs — Kinglet" description="Tutorials and reference notes for the Kinglet language and toolchain.">
+<BaseLayout title={`${t('nav.docs', locale)} — ${t('site.title', locale)}`} description={t('docs.hero.lead', locale)}>
 <SiteHeader />
 <main class="docs-page">
   <header class="subpage-hero docs-hero">
     <div class="shell subpage-hero__grid">
       <div>
-        <p class="eyebrow">Kinglet documentation</p>
-        <h1>Build with the language,<br />not around it.</h1>
+        <p class="eyebrow">{t('docs.hero.eyebrow', locale)}</p>
+        <h1>{t('docs.hero.title.a', locale)}<br />{t('docs.hero.title.b', locale)}</h1>
       </div>
-      <p>Installation, language concepts, standard modules, and compiler tooling—organized as a technical manual rather than a feed.</p>
+      <p>{t('docs.hero.lead', locale)}</p>
     </div>
   </header>
 
   <div class="shell docs-index-layout">
     <aside class="docs-index-nav" aria-label="Documentation sections">
-      <p>On this page</p>
+      <p>本页目录</p>
       <nav>
         {sections.map(([section]) => <a href={`#${section}`}>{section}</a>)}
       </nav>
-      <a class="docs-source" href="https://github.com/kinglet-lang/kinglet-lang.github.io/tree/master/src/content/docs">Edit docs on GitHub ↗</a>
+      <a class="docs-source" href="https://github.com/kinglet-lang/kinglet-lang.github.io/tree/master/src/content/docs/zh">在 GitHub 上编辑文档 ↗</a>
     </aside>
 
     <div class="docs-groups">
-      {sections.length === 0 && <p>No documentation yet.</p>}
+      {sections.length === 0 && <p>{t('docs.empty', locale)}</p>}
       {sections.map(([section, items], sectionIndex) => (
         <section class="docs-group" id={section}>
           <header><span>{String(sectionIndex + 1).padStart(2, '0')}</span><h2>{section}</h2></header>
           <ol>
             {items.map((item, itemIndex) => (
               <li>
-                <a href={`/docs/${item.id}/`}>
+                <a href={`/zh/docs/${idOf(item.id)}/`}>
                   <span>{String(itemIndex + 1).padStart(2, '0')}</span>
                   <div><h3>{item.data.title}</h3>{item.data.description && <p>{item.data.description}</p>}</div>
                   <b aria-hidden="true">→</b>

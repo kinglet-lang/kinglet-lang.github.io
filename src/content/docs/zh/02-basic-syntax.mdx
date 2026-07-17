@@ -1,0 +1,146 @@
+---
+title: "02 基础语法"
+order: 20
+section: "start"
+locale: "zh"
+---
+这一章介绍 Kinglet 的基础语法：变量声明、标量类型、运算符和控制流。看完这一章你能写出带分支、循环的小程序。
+
+## 变量与类型推断
+
+`int name = expr;` 这种写法里类型可以省略，用 `auto name = expr;` 让编译器从初始值推断类型。**Kinglet 没有 `var` 关键字**——`var` 会被当成一个未知类型名，编译报错：
+
+```kl
+int a = 10;
+int b = 3;
+auto c = a + b;      // 推断为 int
+```
+
+`auto` 要求带初始值，`auto c;`（没有初始化表达式）会编译报错，因为没有可推断的来源类型。
+
+`const` 是存储修饰符，可以搭配显式类型或 `auto` 使用，声明后不允许再赋值：
+
+```kl
+const auto pi = 3.14;   // 推断为 double，且不可再赋值
+const int max = 100;
+```
+
+Kinglet 的整数字面量默认类型是 64 位 `int`，不会因为值小就自动收窄成 32 位——这是有意为之的设计,避免同一份代码在字节码 VM 和原生后端上因为宽度不同而算出不同结果。想要固定宽度类型,要显式声明或者用字面量后缀（下一节讲）。
+
+**标量局部变量不带初始值声明时,不会得到 0 这个默认值。**当前教程按 definite-assignment 语义描述：`int a;` 只是声明一个尚未赋值的变量，在赋值前读取会被编译器拒绝。声明就赋值是唯一安全的写法：
+
+```kl
+int a;
+io::out("{}\n", a);   // 编译错误：Variable 'a' may be uninitialized.
+```
+
+```kl
+int a = 0;
+io::out("{}\n", a);   // 0，安全
+```
+
+## 标量类型
+
+| 类型 | 说明 |
+|---|---|
+| `int` | 64 位有符号整数（`int64` 的别名） |
+| `int8`/`int16`/`int32`/`int64` | 固定宽度有符号整数 |
+| `uint8`/`uint16`/`uint32`/`uint64` | 固定宽度无符号整数 |
+| `char` | `int8` 的别名，语义上表示字符 |
+| `byte` | `uint8` 的别名 |
+| `float` | 32 位浮点（`float32` 的别名） |
+| `double` | 64 位浮点（`float64` 的别名） |
+| `string` | 字符串 |
+| `bool` | 布尔值，`true`/`false` |
+
+固定宽度类型用字面量后缀声明，赋值时只允许同宽度或更宽的转换（窄化会报编译错误）：
+
+```kl
+int32 small = 100i32;
+byte b = 200u8;
+```
+
+```kl
+int32 bad = 100;   // 编译错误：Cannot assign int to variable of type int32.
+```
+
+`char` 参与算术和打印时按数值处理，不会转成字符字形——`io::out("\{\}", c)` 打印的是整数值,不是那个字符本身。想要按字符处理字符串,用 string 的方法（第 03 章之后覆盖）。
+
+已验证：`auto`/`const` 声明、赋值窄化报错、`char` 数值打印行为均通过实际编译/运行确认。之前版本误写成 `var`——Kinglet 词法表里没有这个关键字，实际类型推断关键字是 `auto`。标量未初始化这一点以第 03 章的 definite-assignment 规则为准：标量、enum、无 `@init` 的 struct 不带初始化器声明后，在赋值前不可读取；只有 `T?`、`string`、`T[]`、`\{K: V\}` 这类 defaultable 类型声明后可直接读取。
+
+## 运算符
+
+算术、比较、逻辑运算符和大多数 C 系语言一致：
+
+```kl
+int a = 10;
+int b = 3;
+io::out("{} {} {} {}\n", a + b, a - b, a * b, a / b);  // 13 7 30 3
+io::out("{}\n", a % b);                                 // 1
+io::out("{} {} {}\n", a > b, a == b, a != b);           // true false true
+```
+
+逻辑运算符是 `&&`、`||`、`!`：
+
+```kl
+bool x = true;
+bool y = false;
+io::out("{} {} {}\n", x && y, x || y, !x);  // false true false
+```
+
+## 字符串插值
+
+`io::out("\{\}", ...)` 用 `\{\}` 占位，按位置顺序替换：
+
+```kl
+int n = 5;
+int m = 100;
+io::out("{} {}\n", n, m);   // 5 100
+```
+
+字符串拼接用 `+`：
+
+```kl
+string s = "hi" + " " + "there";
+io::out("{}\n", s);  // hi there
+```
+
+## 控制流
+
+`if`/`else` 的条件不需要括号：
+
+```kl
+if true {
+  io::out("yes\n");
+} else {
+  io::out("no\n");
+}
+```
+
+`while` 同样不需要括号：
+
+```kl
+int count = 3;
+while count > 0 {
+  io::out("{}\n", count);
+  count = count - 1;
+}
+```
+
+`for` 是 C 风格的三段式（初始化;条件;步进），**不是** range-for，括号是必需的：
+
+```kl
+int sum = 0;
+for (int i = 0; i < 5; i = i + 1) {
+  sum = sum + i;
+}
+io::out("{}\n", sum);  // 10
+```
+
+已验证：以上运算符、字符串插值、`if`/`while`/`for` 全部示例过了真实编译器,输出与注释一致。
+
+## Related
+
+- [01 环境与工具链](/zh/docs/01-getting-started)
+- [03 复合类型](/zh/docs/03-compound-types)
+- Type Conversion — 标量类型间的 cast 规则细节

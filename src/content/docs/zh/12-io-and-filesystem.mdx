@@ -1,0 +1,140 @@
+---
+title: "12 I/O 与文件系统"
+order: 120
+section: "system"
+locale: "zh"
+---
+这一章讲用户可见的 `io` / `fs` API：怎么输出、怎么用 `byte[]` 读写整个文件、什么时候需要 `fs::file` 句柄，以及 `fs::file` 如何和 `io::reader` / `io::writer` capability 配合。文本编码放在第 13 章的 `txt` 命名空间。
+
+## 终端输出
+
+```kl
+using io;
+
+int main() {
+  io::out.line("hello {}", "Kinglet");
+  io::err.line("warning: {}", "example");
+  return 0;
+}
+```
+
+`io::out.line` 会自动换行。教程里优先使用 `io::out.line(...)`，因为输出边界清楚，不需要手写 `\n`。
+
+## Whole-file byte API
+
+Kinglet 目前的 public whole-file 文件 API 是 byte-oriented：
+
+
+```kl
+using fs;
+
+int main() {
+  byte[] data = [byte(72), byte(73)]; // HI
+  fs::write("/tmp/kinglet-bytes.bin", data);
+
+  byte[] back = fs::read("/tmp/kinglet-bytes.bin");
+  return 0;
+}
+```
+
+`read` / `write` 用 `byte[]`，适合二进制内容。`fs::write` 不接受 `string`；文本内容先用 `txt::utf8.encode(...)` 或 `txt::gbk.encode(...)` 转成 `byte[]`，见 [第 13 章](/zh/docs/13-text-encoding)。`fs::readtext` / `fs::writetext` 已删除。
+
+## 文件存在性
+
+```kl
+using fs;
+using txt;
+
+int main() {
+  if (!fs::exists("/tmp/config.txt")) {
+    byte[] defaults = txt::utf8.encode("default");
+    fs::write("/tmp/config.txt", defaults);
+  }
+  return 0;
+}
+```
+
+目前 public metadata API 只有 `exists` 和 `fs::file.size()`；还没有 `stat` / permissions / timestamps。
+
+## 文件句柄：`fs::file`
+
+需要分步读写、查询大小、同步或显式关闭时，使用 `fs::open` / `fs::create`：
+
+```kl
+using io;
+using fs;
+using txt;
+
+int main() {
+  fs::file seed = fs::create("/tmp/kinglet-input.txt");
+  byte[] hello = txt::utf8.encode("hello");
+  seed.write(hello);
+  seed.sync();
+  seed.close();
+
+  fs::file input = fs::open("/tmp/kinglet-input.txt");
+  io::out.line("{}", input.size());
+  input.close();
+
+  fs::file output = fs::create("/tmp/kinglet-output.txt");
+  byte[] data = [byte(79), byte(75)]; // OK
+  output.write(data);
+  output.sync();
+  output.close();
+  return 0;
+}
+```
+
+`fs::file` 是 resource type。它持有 native file handle；`close()` 和 `sync()` 是资源操作。
+
+## 和 `io::reader` / `io::writer` 配合
+
+`fs::file` 直接满足 `io::reader` / `io::writer`：
+
+```kl
+using io;
+using fs;
+using txt;
+
+int read_once(io::reader input) {
+  byte[] buffer;
+  buffer.resize(16, byte(0));
+  uint64 n = input.read(buffer);
+  io::out.line("{}", n);
+  return 0;
+}
+
+int main() {
+  fs::file seed = fs::create("/tmp/kinglet-reader.txt");
+  byte[] data = txt::utf8.encode("World");
+  seed.write(data);
+  seed.sync();
+  seed.close();
+
+  read_once(fs::open("/tmp/kinglet-reader.txt"));
+  return 0;
+}
+```
+
+这里不要写 `.reader()`。`fs::file` 本身就是 reader/writer capability 的满足者。
+
+## 重要边界
+
+- `io::reader` 只有 `read`；没有 `close()`。
+- `io::writer` 只有 `write`；没有 `sync()` / `close()`。
+- `fs::file` 传给 concept 参数会转移所有权；之后不要再用源变量。
+- whole-file public API 只有 `fs::read(path) -> byte[]` / `fs::write(path, byte[])`；没有 `readtext` / `writetext`。文本编码使用 `txt::utf8` / `txt::gbk`。
+- `read` / `write` 当前用返回 `0` 表达 EOF 或错误；还没有 richer error type。
+- `io::out` / `io::in` 目前不是 first-class `io::writer` / `io::reader`。
+
+## 验证依据
+
+本章对照 `kinglet-lang/bootstrap` canon PR #139 后状态。关键测试包括 `fs_public_api.kl`、`fs_file_basic.kl`、`fs_file_write.kl`、`fs_file_concept_satisfaction.kl`、`txt_encoding.kl`。
+
+## Related
+
+- IO and Filesystem
+- [13 文本编码](/zh/docs/13-text-encoding)
+- [10 泛型与 Concepts](/zh/docs/10-generics-and-concepts)
+- [06 所有权基础](/zh/docs/06-ownership)
+- ADR 0026、ADR 0027、ADR 0032

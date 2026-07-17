@@ -1,0 +1,108 @@
+---
+title: "07 值表示简介"
+order: 70
+section: "semantics"
+locale: "zh"
+---
+前面几章讲了类型怎么声明、怎么转换、谁拥有值。这一章从运行时角度看：一个 Kinglet 值在内存里到底是什么。新手不需要关心全部细节，但理解"哪些类型没有堆分配、哪些走堆"有助于判断性能和解释一些边界行为。完整细节见 Value Representation。
+
+## 64 位统一表示
+
+Kinglet 的运行时值统一用一个 64 位整数 `kl_h` 表示。所有类型的值--不管是 `int`、`float`、`string` 还是 `struct`--在运行时都是一个 `kl_h`。
+
+区别在于这 64 位里装的是什么：有的是数据本身（内联），有的是指向堆内存的指针（堆句柄）。
+
+## 哪些类型内联
+
+以下类型的值直接编码在 `kl_h` 里，**不发生堆分配**：
+
+- **`int`** 及所有整数宽度（`int32`、`uint16`、`byte` 等）-- 值就是数字本身，直接存
+- **`bool`** -- 0 或 1
+- **`char`** -- 字符的数值编码
+- **`float`** / `float32` / `double` / `float64` -- 高 16 位打标记（`0xFFFC`），低 32 位是 IEEE 754 float32 位模式
+- **enum（无 payload）** -- 高 16 位打标记（`0xFFFD`），编码类型索引和 variant 索引
+
+内联类型的赋值是纯位拷贝，没有引用计数开销：
+
+```kl
+int a = 42;        // kl_h 就是 42，没有堆分配
+float f = 3.14;     // kl_h = 0xFFFC | float32位模式
+bool b = true;      // kl_h = 1
+```
+
+## 哪些类型走堆
+
+以下类型的 `kl_h` 存的是**堆指针**（低 48 位是指针，高 16 位打堆标记 `0xFFFE`），数据本身在堆上：
+
+- **`string`** -- 堆上的字符序列
+- **`T[]`（动态数组）** -- 堆上的元素数组
+- **`\{K: V\}`（map）** -- 堆上的键值表
+- **struct** -- 堆上的字段数据，每个字段占一个 64 位槽位
+
+堆对象通过引用计数管理生命周期。赋值时增加引用计数（retain），变量离开作用域时减少（release），计数归零时释放堆内存。
+
+### struct 的堆布局
+
+struct 目前**总是堆分配**，即使字段全是标量：
+
+```kl
+struct Point {
+  int32 x;
+  int32 y;
+}
+// Point p = Point { 1i32, 2i32 };
+// -> 一次堆分配，两个 64 位槽位（各 8 字节 = 16 字节数据区）
+// 不是 C 语义下紧凑的 8 字节
+```
+
+每个字段占满一个 64 位槽位，不管声明宽度。字段读取时模拟窄宽度语义（截断/符号扩展），但存储宽度始终是 64 位。字段顺序按声明顺序，无重排优化。
+
+> **这意味着**：`struct \{ int32 x; int32 y; \}` 在当前实现中占 16 字节堆内存 + 8 字节 struct header，不是 8 字节栈值。未来计划让标量字段的 struct 走栈内联布局，但目前还未实现。
+
+### struct 赋值是引用计数共享
+
+```kl
+using io;
+struct Point {
+  int x;
+  int y;
+}
+int main() {
+  Point a = Point { 1, 2 };
+  Point b = a;        // 共享同一份堆数据（retain）
+  b.x = 99;           // 修改 b 也改了 a
+  io::out("{} {}\n", a.x, b.x);   // 99 99
+  return 0;
+}
+```
+
+struct 赋值是引用计数共享（retain），不是深拷贝。无论 struct 有没有 `@destroy`，赋值时都是 retain 共享；区别只在于 resource type（有 `@destroy` 的 struct）的 checker 会把源变量标记为 transferred 禁止后续访问。详见 Ownership System。
+
+## Optional 的表示
+
+`T?`（Optional）根据底层类型 `T` 的种类自动选择表示策略，用户不需要关心：
+
+- **标量 `T?`**（`int?`、`float?`、`char?`）：用专用 null sentinel（`0xFFFB` 高 16 位标记）表示 null，和 `0` 值区分开。`int? x = 0;` 不是 null，`int? x;`（默认 null）才是 null。
+- **`string?`**：复用 string 的空值状态。
+- **struct `T?`**（如 `Node?`）：用堆指针，null = 空指针，有值 = 指向堆上 struct 的指针。这打破了 struct 自引用的无限大小问题（`struct node \{ node? next; \}` 合法）。
+
+## null sentinel
+
+运行时有一个特殊的 64 位值 `KL_NULL_SENTINEL`（`0xFFFB000000000000`），用于表示 Optional 的 null 状态。它和普通整数值 `0` 不同，也和堆指针标记 `0xFFFE` 不同。
+
+正常程序不会直接观察到 sentinel--definite assignment 规则（第 03 章）保证了未赋值的局部变量不会被读取，`?:` 和 `field?`（第 05 章）正确处理 Optional 的 null 路径。
+
+## 小结
+
+- 所有值统一用 64 位 `kl_h` 表示。
+- `int`、`bool`、`char`、`float`、无 payload enum 内联在 `kl_h` 里，不堆分配。
+- `string`、`T[]`、`\{K: V\}`、struct 走堆，用引用计数管理生命周期。
+- struct 总是堆分配，每个字段占 64 位槽位；struct 赋值是引用计数共享，不是深拷贝。
+- Optional 按底层类型选表示策略：标量用 sentinel，struct 用堆指针。
+- 正常程序不会直接观察到 null sentinel。
+
+## Related
+
+- Value Representation - 完整状态表和已知限制
+- [06 所有权基础](/zh/docs/06-ownership) - 引用计数是 value type 赋值语义的运行时基础
+- [05 Optional 类型与 ?](/zh/docs/05-optional) - Optional 表示策略详解

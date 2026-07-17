@@ -1,0 +1,265 @@
+---
+title: "03 复合类型"
+order: 30
+section: "types"
+locale: "zh"
+---
+这一章介绍 struct、enum、数组和 map--把标量值组织成更复杂结构的四种方式。
+
+## struct
+
+struct 声明一组具名字段，用花括号初始化，字段按声明顺序位置传入：
+
+```kl
+struct Point {
+  int x;
+  int y;
+}
+
+Point p { 3, 4 };
+io::out("{} {}\n", p.x, p.y);  // 3 4
+p.x = 10;
+io::out("{}\n", p.x);          // 10
+```
+
+字段访问和赋值都用 `.`。
+
+## definite assignment：没有初始化器的变量
+
+Kinglet 实行 **definite assignment** 规则：局部变量在读取前必须已被赋值。这不是建议，是编译期硬性检查--不通过就报错，程序不会编译。
+
+哪些类型可以不带初始化器声明、且声明后立即可读？只有拥有语言级默认值的类型：
+
+- `T?` -- 默认 `null`
+- `string` -- 默认空字符串
+- `T[]`（动态数组）-- 默认空数组
+- `\{K: V\}`（map）-- 默认空 map
+
+其他所有类型--`int`、`int32`、`float`、`bool`、`char`、`byte`、enum、不带 `@init` 的 struct--声明时不带初始化器就进入 **Unassigned** 状态，在赋值发生前不可读取：
+
+```kl
+int main() {
+  int a;
+  return a;     // 编译错误：Variable 'a' may be uninitialized.
+}
+```
+
+赋值之后就可以读了：
+
+```kl
+int main() {
+  int a;
+  a = 1;
+  return a;     // OK
+}
+```
+
+### 分支合并
+
+`if/else` 的两个分支都赋值了，合并后变量就是已赋值状态；只有一个分支赋值，仍然算未赋值：
+
+```kl
+int main(bool cond) {
+  int a;
+  if cond {
+    a = 1;
+  } else {
+    a = 2;
+  }
+  return a;     // OK -- 两个分支都赋值了
+}
+```
+
+```kl
+int main(bool cond) {
+  int a;
+  if cond {
+    a = 1;
+  }
+  return a;     // 编译错误 -- false 路径没有赋值
+}
+```
+
+循环体里的赋值不会提升到循环之后--因为循环可能执行零次：
+
+```kl
+int main() {
+  int a;
+  while false {
+    a = 1;
+  }
+  return a;     // 编译错误 -- 循环体可能不执行
+}
+```
+
+### struct 的字段级赋值
+
+struct 局部变量可以逐字段初始化。赋值了某字段后，该字段可读；但未赋值的字段不可读，整体读取也不可：
+
+```kl
+struct Point {
+  int x;
+  int y;
+}
+
+int main() {
+  Point p;
+  p.x = 1;
+  p.y = 2;
+  return p.x + p.y;   // OK -- 所有字段都已赋值
+}
+```
+
+```kl
+int main() {
+  Point p;
+  p.x = 1;
+  return p.y;          // 编译错误：Field 'p.y' may be uninitialized.
+}
+```
+
+```kl
+int dist(Point p) {
+  return p.x + p.y;
+}
+
+int main() {
+  Point p;
+  p.x = 1;
+  return dist(p);      // 编译错误：Variable 'p' is only partially initialized.
+}
+```
+
+当所有字段都被赋值后，struct 变量自动提升为完全已赋值，整体读取就合法了。
+
+> **从 Go/Java 过来的注意**：Kinglet 的 `int a;` 不是零值声明，是"声明了一个尚未赋值的变量"。这和 C++ 的聚合类型语义一致--没有 `@init` 的 struct 就没有隐式清零构造。
+
+## struct 没有内建方法，靠 UFCS
+
+Kinglet 的 struct 声明里只能放字段（以及 `@init`/`@destroy`，第 06 章所有权部分会讲），**不支持在 struct 内部写方法**。看起来像"方法调用"的写法,实际上是 UFCS（统一函数调用语法）：把普通的自由函数,以第一个参数为接收者,用 `.` 语法调用：
+
+```kl
+struct Point {
+  int x;
+  int y;
+}
+
+int dist2(Point p) {
+  return p.x * p.x + p.y * p.y;
+}
+
+int main() {
+  Point p { 3, 4 };
+  io::out("{}\n", p.dist2());   // 25，等价于 dist2(p)
+  return 0;
+}
+```
+
+`p.dist2()` 和 `dist2(p)` 是同一个调用,只是写法不同。这意味着"给某个类型加方法"不需要改动类型定义本身,任何地方声明一个以该类型为第一参数的自由函数,就能以方法语法调用。这套机制也是 concept（第 10 章）实现多态分发的基础。
+
+## enum
+
+不带数据的 enum 是纯粹的具名常量集合,用 `match` 分支处理：
+
+```kl
+enum Color { Red, Green, Blue }
+
+int main() {
+  Color c = Color::Green;
+  int score = c match {
+    Color::Red => 1,
+    Color::Green => 2,
+    Color::Blue => 3,
+  };
+  io::out("{}\n", score);   // 2
+  return 0;
+}
+```
+
+variant 引用要写完整的 `EnumName::Variant`,没有裸 variant 名字的隐式导入。
+
+### 带数据的 variant
+
+variant 后面跟括号里的类型列表,就能携带数据。取值要在 `match` 分支里用 `let` 绑定：
+
+```kl
+enum Option { Some(int), None }
+
+int main() {
+  Option o = Option::Some(42);
+  int r = o match {
+    Option::Some(let x) => x,
+    Option::None => 0,
+  };
+  io::out("{}\n", r);   // 42
+  return 0;
+}
+```
+
+`Some(int)` 括号里写的是字段类型,不是具名字段--取值靠 `match` 分支里的 `let x` 绑定位置,不是字段名。`match` 要求穷尽所有 variant,漏掉一个分支编译报错（除非用 `_` 兜底）。
+
+## 数组
+
+`T[]` 是数组类型,方括号字面量初始化,用 `.len()` 取长度,`.push()` 追加：
+
+```kl
+int main() {
+  int[] nums = [1, 2, 3, 4, 5];
+  io::out("{}\n", nums.len());   // 5
+
+  int sum = 0;
+  for (int i = 0; i < nums.len(); i = i + 1) {
+    sum = sum + nums[i];
+  }
+  io::out("{}\n", sum);          // 15
+
+  nums.push(6);
+  io::out("{}\n", nums.len());   // 6
+  return 0;
+}
+```
+
+注意是 `.len()` 方法调用,不是 `.length` 属性。
+
+数组是 defaultable 类型：`int[] arr;` 不带初始化器也能声明，声明后 `arr` 立即可读，值为空数组，`.push()` 正常工作。
+
+## map
+
+map 类型写成 `\{K: V\}`,字面量同样用花括号,键值对之间冒号分隔：
+
+```kl
+int main() {
+  {string: int} scores = {"alice": 90, "bob": 85};
+  io::out("{}\n", scores["alice"]);   // 90
+
+  scores["carol"] = 70;
+  io::out("{}\n", scores.len());       // 3
+
+  io::out("{}\n", scores.has("bob"));  // true
+  scores.remove("bob");
+  io::out("{}\n", scores.has("bob"));  // false
+  return 0;
+}
+```
+
+常用方法：`.len()`、`.has(key)`、`.remove(key)`、`.keys()`（返回 `K[]`）。索引访问 `m[key]` 找不到 key 时不抛异常,返回该 value 类型的 null（数值类型场景下等价于未命中）。
+
+map 也是 defaultable 类型：`\{string: int\} m;` 声明后即为空 map，可直接使用。
+
+## 小结
+
+- struct 用花括号位置初始化,字段访问用 `.`;没有初始化器时进入 Unassigned 状态，必须逐字段赋值后才能读取。
+- **definite assignment**：标量、enum、无 `@init` 的 struct 不带初始化器声明后，在赋值前不可读取。`T?`、`string`、`T[]`、`\{K: V\}` 有默认值，声明后立即可读。
+- `if/else` 双分支都赋值才提升；循环体赋值不提升。struct 支持字段级赋值追踪。
+- struct 没有内建方法语法,"方法"是自由函数通过 UFCS 用 `.` 调用的语法糖。
+- enum variant 引用要写全名 `Enum::Variant`;带数据的 variant 靠 `match` 里的 `let` 绑定取值,`match` 必须穷尽所有 variant。
+- 数组 `T[]`、map `\{K: V\}` 都是内建复合类型,常用操作是方法调用（`.len()`、`.push()`、`.has()` 等),不是属性访问。
+
+下一章讲这些类型之间、以及和标量类型之间的转换规则。
+
+## Related
+
+- [02 基础语法](/zh/docs/02-basic-syntax)
+- [04 类型转换](/zh/docs/04-type-conversion)
+- Ownership System - struct 的 `@init`/`@destroy` 和资源类型语义
+- Type Conversion

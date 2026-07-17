@@ -1,0 +1,119 @@
+---
+title: "11 命名空间与模块"
+order: 110
+section: "system"
+locale: "zh"
+---
+Kinglet 的模块系统借鉴 C++20 modules：每个 `.kl` 文件声明自己的 logical module name，其他文件用 `import` 按逻辑名导入。命名空间导入则由 `using` 控制，常见于 `io`、`fs`、`sys`、`txt` 这些内建命名空间。
+
+## 单文件也可以有 using
+
+```kl
+using io;
+
+int main() {
+  io::out.line("hello");
+  return 0;
+}
+```
+
+`using io;` 让 `reader` / `writer` 等 `io` 命名空间里的类型名可裸写，但调用 `io::out.line` 时仍然可以保留 `io::` 前缀。
+
+## `using namespace io`
+
+当前也支持 `using namespace io` 形式：
+
+```kl
+using namespace io;
+
+int main() {
+  out.line("hello");
+  return 0;
+}
+```
+
+这会把 `io` 命名空间成员作为未限定名使用。教程中更推荐保留 `io::out` 这种显式写法，因为读者更容易看出 API 来自哪个命名空间。
+
+## 文件声明模块名
+
+项目中的源文件通常从 `export module ...;` 开始：
+
+```kl
+export module math.basic;
+
+int add(int a, int b) {
+  return a + b;
+}
+```
+
+另一个文件导入它：
+
+```kl
+export module app;
+import math.basic;
+using io;
+
+int main() {
+  io::out.line("{}", math::basic::add(1, 2));
+  return 0;
+}
+```
+
+模块名是逻辑名，不是文件路径。文件路径由 `kinglet.nest` 的 target `sources` 决定。
+
+## Manifest 决定哪些文件参与构建
+
+`kinglet.nest` 描述项目和 target：
+
+```nest
+project "demo" version "0.1.0"
+
+target app {
+  kind    = "binary"
+  sources = ["src/", "math/"]
+}
+
+build {
+  default = "app"
+  out     = ".kinglet/out"
+  cache   = ".kinglet/cache"
+}
+```
+
+`sources = ["src/"]` 表示把目录里的 `.kl` 文件纳入 target。模块名仍由文件里的 `export module ...;` 决定。
+
+## Qualified names
+
+Kinglet 用 `::` 写 qualified names：
+
+```kl
+io::out.line("hello");
+fs::read("/tmp/file.txt");
+txt::utf8.encode("hello");
+Color::Red;
+```
+
+`io::reader` / `io::writer` 也是 qualified type names，可以直接出现在类型位置：
+
+```kl
+int read_once(io::reader input) { ... }
+```
+
+这依赖 ADR 0025 的 namespace-qualified type names。
+
+## 重要边界
+
+- `import` 负责模块间依赖；`using` 负责把命名空间成员带入当前文件。
+- `using io;` 不等于把所有输出函数变成全局函数。显式写 `io::out` 仍然是最清楚的风格。
+- `io` / `fs` / `sys` / `txt` 当前是 compiler-known runtime namespaces，不是普通 `.kl` stdlib module。
+- `namespace io \{ ... \}` 这种用户源码里的 namespace block 当前不支持。
+
+## 验证依据
+
+本章基于官网 syntax 页面、`kinglet-lang/bootstrap` 的 `AGENTS.md` / `README.md`、以及现有测试中的 `using io`、`using namespace io`、qualified type name 和 project manifest 用法整理。ADR 0018、ADR 0020、ADR 0025 记录模块、manifest 和 qualified type name 的设计背景。
+
+## Related
+
+- [01 环境与工具链](/zh/docs/01-getting-started)
+- [10 泛型与 Concepts](/zh/docs/10-generics-and-concepts)
+- ADR 0018、ADR 0020、ADR 0025、ADR 0032

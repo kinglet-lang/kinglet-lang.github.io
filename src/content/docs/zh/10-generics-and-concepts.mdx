@@ -1,0 +1,140 @@
+---
+title: "10 泛型与 Concepts"
+order: 100
+section: "system"
+locale: "zh"
+---
+Kinglet 的泛型用于“同一段代码适配多个具体类型”，`concept` 用于“限制这些具体类型必须提供哪些操作”。泛型是单态化的：编译器会为实际用到的具体类型生成具体版本。
+
+## 泛型函数
+
+最小形式是在函数名后写类型参数：
+
+```kl
+using io;
+
+T identity<T>(T x) {
+  return x;
+}
+
+int main() {
+  int a = identity<int>(42);
+  int b = identity(7);
+  io::out.line("{} {}", a, b);
+  return 0;
+}
+```
+
+`identity<int>(42)` 显式指定 `T = int`。`identity(7)` 由参数推断 `T = int`。
+
+## 泛型 struct
+
+```kl
+struct Box<T> {
+  T value;
+}
+
+int main() {
+  Box<int> b;
+  b.value = 42;
+  return 0;
+}
+```
+
+泛型 struct 也是按具体类型使用：`Box<int>`、`Box<string>` 是不同实例。
+
+## Concept：给泛型参数加能力约束
+
+一个 concept 描述“类型必须提供哪些函数”。比如一个可打印能力可以写成：
+
+```kl
+concept Printable<T> {
+  string to_string(T self);
+}
+
+string to_string(int x) {
+  return string(x);
+}
+
+int show(Printable value) {
+  string text = value.to_string();
+  return 0;
+}
+```
+
+`value.to_string()` 使用的是 UFCS：它等价于 `to_string(value)`。因此满足 concept 的通常是 free function，而不是 struct 内部的成员表。
+
+## 内建 concept：`io::reader` 与 `io::writer`
+
+Kinglet 内建两个标准 I/O 能力：
+
+```kl
+concept reader<T> {
+  uint64 read(T self, byte[]& buffer);
+}
+
+concept writer<T> {
+  uint64 write(T self, byte[] data);
+}
+```
+
+你不需要自己声明它们。可以写成 qualified name：
+
+```kl
+int read_once(io::reader input) { ... }
+```
+
+如果 `using io;` 已经引入命名空间，也可以裸写：
+
+```kl
+using io;
+
+int read_once(reader input) { ... }
+```
+
+## `fs::file` 直接满足 reader/writer
+
+```kl
+using io;
+using fs;
+
+int read_once(io::reader input) {
+  byte[] buffer;
+  buffer.resize(16, byte(0));
+  uint64 n = input.read(buffer);
+  io::out.line("{}", n);
+  return 0;
+}
+
+int main() {
+  fs::file seed = fs::create("/tmp/kinglet-reader.txt");
+  byte[] hello = [byte(104), byte(101), byte(108), byte(108), byte(111)];
+  seed.write(hello);
+  seed.sync();
+  seed.close();
+
+  read_once(fs::open("/tmp/kinglet-reader.txt"));
+  return 0;
+}
+```
+
+这里没有 `.reader()`。`fs::open(...)` 返回 `fs::file`，而 `fs::file` 已经提供 `read`，所以它直接满足 `io::reader`。
+
+同理，`fs::file` 也因为提供 `write(byte[])` 而满足 `io::writer`。
+
+## 重要边界
+
+- `io::reader` 只要求 `read`，不要求 `close()`。
+- `io::writer` 只要求 `write`，不要求 `sync()` 或 `close()`。
+- `fs::file` 是 resource type。按值传给 concept 参数会转移所有权。
+- `io::out` / `io::err` / `io::in` 目前不是 `io::writer` / `io::reader` 的实现者，它们仍是编译器 intrinsic。
+
+## 验证依据
+
+本章对照 `kinglet-lang/bootstrap` canon PR #139 后状态，关键覆盖来自 `tests/exec/cases/builtin_io_concepts.kl`、`concept_forward.kl`、`fs_file_concept_satisfaction.kl` 和 sema 的 concept 相关用例。
+
+## Related
+
+- Concepts and Generics
+- [12 I/O 与文件系统](/zh/docs/12-io-and-filesystem)
+- ADR 0009、ADR 0026、ADR 0027

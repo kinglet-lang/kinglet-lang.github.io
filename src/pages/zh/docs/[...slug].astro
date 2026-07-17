@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SiteHeader from '../../../components/SiteHeader.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('docs', ({ data }) => !data.draft && (data.locale ?? 'en') === 'zh'))
+    .sort((a, b) => a.data.order - b.data.order);
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id.replace(/^zh\//, '') },
+    props: { entry, entries, previous: entries[index - 1], next: entries[index + 1] },
+  }));
+}
+
+const { entry, entries, previous, next } = Astro.props;
+const { Content } = await render(entry);
+const bySection: Record<string, typeof entries> = {};
+for (const item of entries) (bySection[item.data.section ?? 'guide'] ??= []).push(item);
+const idOf = (fullId: string) => fullId.replace(/^zh\//, '');
+---
+<BaseLayout title={`${entry.data.title} — Kinglet 文档`} description={entry.data.description}>
+<SiteHeader />
+<main class="docs-page">
+  <div class="shell docs-reader">
+    <aside class="docs-sidebar" aria-label="文档导航">
+      <a class="docs-sidebar__home" href="/zh/docs">← 文档</a>
+      {Object.entries(bySection).map(([section, items]) => (
+        <section>
+          <h2>{section}</h2>
+          <nav>{items.map(item => <a class={item.id === entry.id ? 'active' : ''} aria-current={item.id === entry.id ? 'page' : undefined} href={`/zh/docs/${idOf(item.id)}/`}>{item.data.title}</a>)}</nav>
+        </section>
+      ))}
+    </aside>
+
+    <article class="docs-article">
+      <header>
+        <p class="eyebrow">文档 · {entry.data.section}</p>
+        <h1>{entry.data.title}</h1>
+        {entry.data.description && <p class="lede">{entry.data.description}</p>}
+      </header>
+      <div class="prose"><Content /></div>
+      <nav class="docs-pager" aria-label="文档翻页">
+        {previous ? <a href={`/zh/docs/${idOf(previous.id)}/`}><small>上一章</small><span>← {previous.data.title}</span></a> : <span />}
+        {next && <a class="next" href={`/zh/docs/${idOf(next.id)}/`}><small>下一章</small><span>{next.data.title} →</span></a>}
+      </nav>
+    </article>
+  </div>
+</main>
+<SiteFooter />
+</BaseLayout>

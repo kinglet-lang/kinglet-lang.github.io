@@ -20,6 +20,7 @@ const docs = defineCollection({
     description: z.string().optional(),
     order: z.number().default(100),
     section: z.string().default('guide'),
+    locale: z.enum(['en', 'zh']).default('en'),
     updatedDate: z.coerce.date().optional(),
     draft: z.boolean().default(false),
   }),
