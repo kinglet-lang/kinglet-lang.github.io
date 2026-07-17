@@ -9,13 +9,48 @@ import SiteFooter from '../components/SiteFooter.astro';
 <main>
   <section class="hero">
     <div class="shell hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow">The Kinglet programming language</p>
-        <h1>Native software,<br />with explicit boundaries.</h1>
-        <p class="lede">Kinglet is a modern, statically typed language that compiles ahead of time to native code. Its C-family syntax stays familiar while ownership, exhaustive matching, and capability-oriented I/O make important program boundaries visible.</p>
-        <div class="hero-actions">
-          <a class="button" href="#get-started">Get Kinglet</a>
-          <a class="text-link" href="/docs">Read the language guide <span aria-hidden="true">→</span></a>
+      <p class="eyebrow hero-stagger" style="--stagger:0">The Kinglet programming language</p>
+
+      <h1 class="hero-stagger" style="--stagger:1">A native language with <em>explicit boundaries.</em></h1>
+
+      <div class="hero-actions hero-stagger" style="--stagger:2">
+        <button class="button" type="button" disabled aria-disabled="true">Download</button>
+        <a class="text-link" href="/docs">Read the guide →</a>
+      </div>
+
+      <div class="hero-editor hero-stagger" style="--stagger:3" aria-label="Kinglet source example">
+        <div class="hero-editor__head">
+          <span>shape.kl</span>
+          <div class="hero-editor__actions">
+            <button type="button" class="hero-editor__btn" data-run="hero" data-target="hero-output">Run</button>
+            <button type="button" class="hero-editor__btn" id="hero-copy" aria-label="Copy code"><span id="hero-copy-label">Copy</span></button>
+          </div>
+        </div>
+<pre id="hero-code" data-stdout="3.14"><code><span class="kw">using</span> io;
+
+<span class="kw">enum</span> <span class="ty">Shape</span> {'{'}
+  <span class="ty">Circle</span>(<span class="ty">float</span>),
+  <span class="ty">Rect</span>(<span class="ty">float</span>, <span class="ty">float</span>),
+{'}'}
+
+<span class="ty">float</span> <span class="fn">area</span>(<span class="ty">Shape</span> s) {'{'}
+  <span class="kw">return</span> s <span class="kw">match</span> {'{'}
+    <span class="ty">Shape</span>::<span class="ty">Circle</span>(<span class="kw">let</span> r) ={'>'} <span class="num">3.14</span> * r * r,
+    <span class="ty">Shape</span>::<span class="ty">Rect</span>(<span class="kw">let</span> w, <span class="kw">let</span> h) ={'>'} w * h,
+  {'}'};
+{'}'}
+
+<span class="ty">int</span> <span class="fn">main</span>() {'{'}
+  <span class="ty">Shape</span> c = <span class="ty">Shape</span>::<span class="ty">Circle</span>(<span class="num">1.0</span>);
+  io::out.<span class="fn">line</span>(<span class="fn">area</span>(c));
+  <span class="kw">return</span> <span class="num">0</span>;
+{'}'}<span class="caret" aria-hidden="true"></span></code></pre>
+        <div class="hero-editor__output" id="hero-output" hidden aria-live="polite">
+          <div class="hero-editor__output-head">
+            <span>$ kinglet shape.kl</span>
+            <span class="hero-editor__preview-tag">preview</span>
+          </div>
+<pre class="hero-editor__stdout"></pre>
         </div>
       </div>
     </div>
@@ -24,26 +59,26 @@ import SiteFooter from '../components/SiteFooter.astro';
   <section class="language" id="language">
     <div class="shell section-grid">
       <header class="section-intro">
-        <p class="section-number">01 / Language</p>
+        <p class="section-number">Language</p>
         <h2>A small surface for systems that need to stay understandable.</h2>
-        <p>Kinglet combines direct native compilation with language-level tools for expressing data, control flow, and resource access clearly.</p>
+        <p>Kinglet compiles directly to native code and stays close to C-family syntax, while making the parts a reader usually has to guess — lifetimes, states, effects — visible in the source.</p>
       </header>
       <div class="feature-list">
         <article>
-          <span>01</span>
-          <div><h3>Ownership</h3><p>Resource lifetimes are part of the program model rather than hidden behind a tracing runtime.</p></div>
+          <div><h3>Ownership</h3></div>
+          <div><p>Resource lifetimes are part of the program model rather than hidden behind a tracing runtime.</p></div>
         </article>
         <article>
-          <span>02</span>
-          <div><h3>Algebraic data types</h3><p>Enums carry data, and exhaustive pattern matching keeps every state accounted for.</p></div>
+          <div><h3>Algebraic data types</h3></div>
+          <div><p>Enums carry data; matches are exhaustive, so every state is accounted for at the point it is used.</p></div>
         </article>
         <article>
-          <span>03</span>
-          <div><h3>Explicit capabilities</h3><p>Modules such as I/O and text encoding are imported and used at visible call sites.</p></div>
+          <div><h3>Explicit capabilities</h3></div>
+          <div><p>Modules such as <code>io</code>, encoding, and filesystem are imported by name and used at visible call sites.</p></div>
         </article>
         <article>
-          <span>04</span>
-          <div><h3>Native by default</h3><p>The compiler emits object code through LLVM and produces ordinary platform binaries.</p></div>
+          <div><h3>Native by default</h3></div>
+          <div><p>The compiler emits object code through LLVM and produces ordinary platform binaries — no VM, no bundled runtime.</p></div>
         </article>
       </div>
     </div>
@@ -52,26 +87,45 @@ import SiteFooter from '../components/SiteFooter.astro';
   <section class="code-section" aria-labelledby="code-title">
     <div class="shell code-grid">
       <div class="code-copy">
-        <p class="section-number section-number--light">02 / In code</p>
-        <h2 id="code-title">Familiar syntax.<br />Stronger guarantees.</h2>
-        <p>Tagged data and exhaustive matching are ordinary parts of the language—not framework conventions.</p>
-        <a href="/docs">Explore Kinglet syntax <span aria-hidden="true">→</span></a>
+        <p class="section-number">In code</p>
+        <h2 id="code-title">Failure is a value.</h2>
+        <p>Nullable types, propagation with <code>?</code>, and <code>try / catch</code> make error paths visible instead of implicit.</p>
+        <a href="/docs">Explore the syntax →</a>
       </div>
       <div class="editor" aria-label="Kinglet code example">
-        <div class="editor-head"><span>shape.kl</span><span>kinglet</span></div>
-<pre><code><span class="kw">using</span> io;
+        <div class="editor-head">
+          <span>read.kl</span>
+          <div class="hero-editor__actions">
+            <button type="button" class="hero-editor__btn" data-run="code" data-target="code-output">Run</button>
+            <button type="button" class="hero-editor__btn" id="code-copy" aria-label="Copy code"><span id="code-copy-label">Copy</span></button>
+          </div>
+        </div>
+<pre id="code-block" data-stdout="a = 420&#10;n = -99"><code><span class="kw">using</span> io;
 
-<span class="kw">enum</span> <span class="ty">Shape</span> {'{'}
-  <span class="ty">Circle</span>(<span class="ty">float</span>),
-  <span class="ty">Rect</span>(<span class="ty">float</span>, <span class="ty">float</span>),
+<span class="ty">int</span>? <span class="fn">parse</span>(<span class="ty">string</span> s) {'{'}
+  <span class="kw">return</span> <span class="ty">int</span>(s)? * <span class="num">10</span>;
 {'}'}
 
-<span class="ty">float</span> <span class="fn">area</span>(<span class="ty">Shape</span> shape) {'{'}
-  <span class="kw">return</span> shape <span class="kw">match</span> {'{'}
-    <span class="ty">Shape</span>::<span class="ty">Circle</span>(<span class="kw">let</span> r) ={'>'} <span class="num">3.14</span> * r * r,
-    <span class="ty">Shape</span>::<span class="ty">Rect</span>(<span class="kw">let</span> w, <span class="kw">let</span> h) ={'>'} w * h,
-  {'}'};
+<span class="ty">int</span> <span class="fn">main</span>() {'{'}
+  <span class="ty">int</span>? a = <span class="fn">parse</span>(<span class="num">"42"</span>) ?: <span class="num">-1</span>;
+  io::out.<span class="fn">line</span>(<span class="num">"a = {'{}'}"</span>, a);
+
+  <span class="ty">int</span> n;
+  <span class="kw">try</span> {'{'}
+    n = <span class="ty">int</span>(<span class="num">"bad"</span>)?;
+  {'}'} <span class="kw">catch</span> (<span class="kw">let</span> ex: <span class="ty">CastError</span>) {'{'}
+    n = <span class="num">-99</span>;
+  {'}'}
+  io::out.<span class="fn">line</span>(<span class="num">"n = {'{}'}"</span>, n);
+  <span class="kw">return</span> <span class="num">0</span>;
 {'}'}</code></pre>
+        <div class="hero-editor__output" id="code-output" hidden aria-live="polite">
+          <div class="hero-editor__output-head">
+            <span>$ kinglet read.kl</span>
+            <span class="hero-editor__preview-tag">preview</span>
+          </div>
+<pre class="hero-editor__stdout"></pre>
+        </div>
       </div>
     </div>
   </section>
@@ -79,15 +133,15 @@ import SiteFooter from '../components/SiteFooter.astro';
   <section class="compiler" id="compiler">
     <div class="shell section-grid">
       <header class="section-intro">
-        <p class="section-number">03 / Toolchain</p>
+        <p class="section-number">Toolchain</p>
         <h2>One compiler, from source to a native executable.</h2>
-        <p>The C++ bootstrap compiler contains the parser, semantic checker, Kinglet IR, LLVM lowering, runtime, and command-line driver.</p>
+        <p>The bootstrap compiler covers parsing, semantic checking, Kinglet IR, LLVM lowering, a small runtime, and the command-line driver — all in one binary.</p>
       </header>
       <div class="pipeline" aria-label="Compilation pipeline">
-        <div><strong>Source</strong><span>.kl</span></div><i aria-hidden="true">→</i>
-        <div><strong>Check</strong><span>types + semantics</span></div><i aria-hidden="true">→</i>
-        <div><strong>Lower</strong><span>Kinglet IR</span></div><i aria-hidden="true">→</i>
-        <div><strong>Emit</strong><span>native code</span></div>
+        <div><strong>01 · Source</strong><span>.kl</span></div>
+        <div><strong>02 · Check</strong><span>Types &amp; semantics</span></div>
+        <div><strong>03 · Lower</strong><span>Kinglet IR</span></div>
+        <div><strong>04 · Emit</strong><span>Native binary</span></div>
       </div>
       <div class="project-links">
         <a href="https://github.com/kinglet-lang/bootstrap"><span>Compiler source</span><small>github.com/kinglet-lang/bootstrap</small></a>
@@ -100,18 +154,17 @@ import SiteFooter from '../components/SiteFooter.astro';
   <section class="get-started" id="get-started">
     <div class="shell start-grid">
       <div>
-        <p class="section-number section-number--light">04 / Get started</p>
-        <h2>Build your first Kinglet program.</h2>
-        <p>Install the current toolchain, then follow the syntax guide to compile and run a source file.</p>
+        <p class="section-number">Get started</p>
+        <h2>Install the toolchain and build your first program.</h2>
+        <p>The installer works on macOS and Linux. Windows is supported through PowerShell.</p>
       </div>
       <div class="install-block">
-        <div class="platform-tabs" role="group" aria-label="Installation platform">
-          <button type="button" data-platform="macos" aria-pressed="true">macOS</button>
-          <button type="button" data-platform="linux" aria-pressed="false">Linux</button>
-          <button type="button" data-platform="windows" aria-pressed="false">Windows</button>
+        <div class="install-command"><span id="prompt">$</span><code id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code><button id="copy" type="button"><span id="copy-label">Copy</span></button></div>
+        <p class="install-note">Windows PowerShell: <code>irm https://kinglet-lang.org/install.ps1 | iex</code></p>
+        <div class="start-links">
+          <a href="/docs">Read the guide →</a>
+          <a href="https://github.com/kinglet-lang/bootstrap">Build from source →</a>
         </div>
-        <div class="install-command"><span id="prompt">$</span><code id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code><button id="copy" type="button"><span id="copy-label">copy</span></button></div>
-        <div class="start-links"><a href="/docs">Open the language guide →</a><a href="https://github.com/kinglet-lang/bootstrap">Build from source →</a></div>
       </div>
     </div>
   </section>
@@ -121,30 +174,55 @@ import SiteFooter from '../components/SiteFooter.astro';
 
 <script is:inline>
 (function () {
-  var tabs = document.querySelectorAll('.platform-tabs button');
-  var promptEl = document.getElementById('prompt');
   var cmdEl = document.getElementById('cmd');
   var copyBtn = document.getElementById('copy');
   var copyLabel = document.getElementById('copy-label');
-  var commands = {
-    macos: { prompt: '$', command: 'curl -fsSL https://kinglet-lang.org/install.sh | sh' },
-    linux: { prompt: '$', command: 'curl -fsSL https://kinglet-lang.org/install.sh | sh' },
-    windows: { prompt: 'PS>', command: 'irm https://kinglet-lang.org/install.ps1 | iex' }
-  };
-  var current = 'macos';
-  function select(platform) {
-    current = platform;
-    promptEl.textContent = commands[platform].prompt;
-    cmdEl.textContent = commands[platform].command;
-    tabs.forEach(function (tab) { tab.setAttribute('aria-pressed', tab.dataset.platform === platform); });
-  }
-  var system = (navigator.userAgent || '') + (navigator.platform || '');
-  select(/Win/i.test(system) ? 'windows' : /Linux/i.test(system) ? 'linux' : 'macos');
-  tabs.forEach(function (tab) { tab.addEventListener('click', function () { select(tab.dataset.platform); }); });
   copyBtn.addEventListener('click', function () {
-    if (navigator.clipboard) navigator.clipboard.writeText(commands[current].command);
-    copyLabel.textContent = 'copied';
-    window.setTimeout(function () { copyLabel.textContent = 'copy'; }, 1400);
+    if (navigator.clipboard) navigator.clipboard.writeText(cmdEl.textContent);
+    copyLabel.textContent = 'Copied';
+    window.setTimeout(function () { copyLabel.textContent = 'Copy'; }, 1400);
+  });
+
+  var codeEl = document.getElementById('hero-code');
+  var heroCopyBtn = document.getElementById('hero-copy');
+  var heroCopyLabel = document.getElementById('hero-copy-label');
+  if (codeEl && heroCopyBtn) {
+    heroCopyBtn.addEventListener('click', function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(codeEl.textContent.trim());
+      heroCopyLabel.textContent = 'Copied';
+      window.setTimeout(function () { heroCopyLabel.textContent = 'Copy'; }, 1400);
+    });
+  }
+
+  var codeBlock = document.getElementById('code-block');
+  var codeCopyBtn = document.getElementById('code-copy');
+  var codeCopyLabel = document.getElementById('code-copy-label');
+  if (codeBlock && codeCopyBtn) {
+    codeCopyBtn.addEventListener('click', function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(codeBlock.textContent.trim());
+      codeCopyLabel.textContent = 'Copied';
+      window.setTimeout(function () { codeCopyLabel.textContent = 'Copy'; }, 1400);
+    });
+  }
+
+  // Run buttons: reveal the preview output panel for each example.
+  var sources = { hero: codeEl, code: codeBlock };
+  document.querySelectorAll('[data-run]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var source = sources[btn.dataset.run];
+      var panel = document.getElementById(btn.dataset.target);
+      if (!source || !panel) return;
+      var stdout = source.getAttribute('data-stdout') || '';
+      var out = panel.querySelector('.hero-editor__stdout');
+      if (panel.hidden) {
+        out.textContent = stdout;
+        panel.hidden = false;
+        btn.textContent = 'Hide';
+      } else {
+        panel.hidden = true;
+        btn.textContent = 'Run';
+      }
+    });
   });
 })();
 </script>
