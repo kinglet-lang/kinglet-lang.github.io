@@ -107,6 +107,39 @@ img, svg { display: block; }
 .github-link svg { width: 20px; height: 20px; }
 .github-link::after { display: none; }
 .github-link:hover { color: var(--teal); }
+.nav-soon {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--faint);
+  font: 500 13.5px/1 var(--sans);
+  letter-spacing: 0.01em;
+  padding: 4px 0;
+  cursor: not-allowed;
+}
+.nav-soon b {
+  padding: 2px 6px;
+  border: 1px solid var(--soft);
+  color: var(--faint);
+  font: 500 9.5px/1 var(--mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.mobile-soon {
+  padding: 18px calc(var(--pad-x, 24px));
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--soft);
+  color: var(--faint);
+  cursor: not-allowed;
+}
+.mobile-soon > span { font: 500 17px/1 var(--sans); letter-spacing: -0.005em; }
+.mobile-soon b {
+  padding: 2px 8px;
+  border: 1px solid var(--soft);
+  color: var(--faint);
+  font: 500 10px/1 var(--mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+}
 
 /* keep the mobile-details nav workable; will replace visuals in a later pass */
 .mobile-nav { display: none; position: relative; }
