@@ -1,0 +1,496 @@
+---
+import { t, defaultLocale, type Locale } from '../i18n';
+import releases from '../data/releases.json';
+
+const locale = (Astro.currentLocale ?? defaultLocale) as Locale;
+const current = releases.releases[0];
+const assetBase = `https://github.com/kinglet-lang/bootstrap/releases/download/${current.tag}`;
+
+// Platform metadata for rendering order and labels.
+const platforms = [
+  { key: 'windows-x64', labelKey: 'download.platform.windows' },
+  { key: 'macos-arm64', labelKey: 'download.platform.macos' },
+  { key: 'linux-x64', labelKey: 'download.platform.linux' },
+] as const;
+
+// Pick a sane default for the main CTA; client JS will refine by UA.
+const defaultPlatform = 'linux-x64';
+const defaultAsset = current.assets[defaultPlatform];
+---
+<main class="download-page">
+  <section class="download-hero">
+    <div class="shell">
+      <p class="eyebrow">{t('download.eyebrow', locale)}</p>
+      <h1>{t('download.h1', locale)}</h1>
+
+      <div class="cta-block">
+        <a
+          id="primary-cta"
+          class="cta-button"
+          href={`${assetBase}/${defaultAsset.file}`}
+          data-default-platform={defaultPlatform}
+        >
+          <span class="cta-button__label" id="cta-label">
+            {t('download.cta.primary', locale, { platform: t('download.platform.linux', locale) })}
+          </span>
+          <span class="cta-button__meta" id="cta-meta">
+            {t('download.cta.meta', locale, { tag: current.tag, size: defaultAsset.size })}
+          </span>
+        </a>
+        <div class="cta-links">
+          <a href="#platforms" class="text-link">{t('download.cta.other', locale)}</a>
+          <span class="sep" aria-hidden="true">·</span>
+          <a href={current.releaseNotesUrl} class="text-link">{t('download.cta.releaseNotes', locale)}</a>
+          <span class="sep" aria-hidden="true">·</span>
+          <a href="https://github.com/kinglet-lang/bootstrap/releases" class="text-link">{t('download.cta.allReleases', locale)}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="download-latest" id="platforms">
+    <div class="shell">
+      <div class="platforms">
+        {platforms.map(({ key, labelKey }) => {
+          const asset = current.assets[key];
+          if (!asset) return null;
+          return (
+            <section class="platform-block">
+              <h2>{t(labelKey, locale)}</h2>
+              <div class="asset-row">
+                <a class="asset-link" href={`${assetBase}/${asset.file}`}>
+                  <span class="asset-link__icon" aria-hidden="true">↓</span>
+                  <code>{asset.file}</code>
+                </a>
+                <span class="asset-meta">{asset.size}</span>
+                {asset.note && <span class="asset-note">{asset.note}</span>}
+              </div>
+              <details class="asset-sha">
+                <summary>
+                  <span class="show">{t('download.showSha', locale)}</span>
+                  <span class="hide">{t('download.hideSha', locale)}</span>
+                </summary>
+                <code>{asset.sha256}</code>
+              </details>
+            </section>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <section class="download-install">
+    <div class="shell">
+      <h2>{t('download.install.title', locale)}</h2>
+
+      <div class="install-grid">
+        <div class="install-block">
+          <h3>{t('download.install.unix', locale)}</h3>
+          <pre><code>$ tar xzf kinglet-*.tar.gz
+$ cd kinglet-*
+$ sudo cp -r bin lib /usr/local/
+
+<span class="comment"># {t('download.install.pathHint', locale)}</span>
+$ export PATH="$PWD/bin:$PATH"</code></pre>
+        </div>
+
+        <div class="install-block">
+          <h3>{t('download.install.windows', locale)}</h3>
+          <pre><code>PS&gt; tar xzf kinglet-windows-x64.tar.gz
+PS&gt; cd kinglet-windows-x64
+
+<span class="comment"># {t('download.install.pathHint', locale)}</span>
+PS&gt; $env:Path += ";$PWD\bin"</code></pre>
+        </div>
+      </div>
+
+      <div class="verify-block">
+        <h3>{t('download.verify.title', locale)}</h3>
+        <p>{t('download.verify.body', locale)}</p>
+        <pre><code>$ curl -LO {assetBase}/SHA256SUMS
+$ sha256sum -c SHA256SUMS</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="download-older">
+    <div class="shell">
+      <h2>{t('download.older.title', locale)}</h2>
+      <p class="older-empty">{t('download.older.empty', locale)}</p>
+    </div>
+  </section>
+
+  <section class="download-source">
+    <div class="shell">
+      <h2>{t('download.source.title', locale)}</h2>
+      <p><a class="text-link" href="https://github.com/kinglet-lang/bootstrap">{t('download.source.link', locale)}</a></p>
+    </div>
+  </section>
+</main>
+
+<script define:vars={{ assetBase, current, locale }}>
+  // Progressive enhancement: detect the visitor's platform and update the
+  // primary CTA to point directly at the matching archive. Defaults to
+  // Linux if detection fails.
+  (function () {
+    const ua = navigator.userAgent || '';
+    const platformMap = {
+      'windows-x64': {
+        match: () => /Windows/i.test(ua),
+        label: { en: 'Windows', zh: 'Windows' },
+      },
+      'macos-arm64': {
+        // We only ship Apple Silicon builds. Intel Mac users will need to
+        // pick a different asset, so don't recommend macOS here unless we
+        // have reasonable confidence it's Apple Silicon. UA alone can't
+        // distinguish arm64 from x86_64 on macOS — both report "Intel" — so
+        // we always show macOS and let the note in the asset list clarify.
+        match: () => /Mac OS X|Macintosh/i.test(ua),
+        label: { en: 'macOS', zh: 'macOS' },
+      },
+      'linux-x64': {
+        match: () => /Linux|X11/i.test(ua),
+        label: { en: 'Linux', zh: 'Linux' },
+      },
+    };
+
+    let detected = 'linux-x64';
+    for (const [key, { match }] of Object.entries(platformMap)) {
+      if (match()) {
+        detected = key;
+        break;
+      }
+    }
+
+    const asset = current.assets[detected];
+    if (!asset) return;
+
+    const cta = document.getElementById('primary-cta');
+    const label = document.getElementById('cta-label');
+    const meta = document.getElementById('cta-meta');
+    if (!cta || !label || !meta) return;
+
+    const template = locale === 'zh' ? `下载 ${platformMap[detected].label.zh} 版本` : `Download for ${platformMap[detected].label.en}`;
+    const metaText = `${current.tag} · ${asset.size} · tar.gz`;
+
+    cta.href = `${assetBase}/${asset.file}`;
+    label.textContent = template;
+    meta.textContent = metaText;
+  })();
+</script>
+
+<style>
+.download-page {
+  padding-bottom: 80px;
+}
+
+/* ---------- Hero + primary CTA ---------- */
+.download-hero {
+  padding: 96px 0 64px;
+  border-bottom: 1px solid var(--soft);
+}
+
+.download-hero .eyebrow {
+  margin: 0 0 16px;
+  font: 500 12px/1 var(--mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.download-hero h1 {
+  margin: 0 0 48px;
+  font: 500 56px/1.05 var(--sans);
+  letter-spacing: -0.01em;
+  max-width: 720px;
+}
+
+.cta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 560px;
+}
+
+.cta-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 24px 32px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.cta-button:hover {
+  background: var(--orange-dark);
+  border-color: var(--orange-dark);
+  color: var(--paper);
+  transform: translateY(-1px);
+}
+
+.cta-button__label {
+  font: 600 22px/1.2 var(--sans);
+  letter-spacing: -0.005em;
+}
+
+.cta-button__meta {
+  font: 400 13px/1 var(--mono);
+  opacity: 0.75;
+}
+
+.cta-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.cta-links .sep {
+  color: var(--faint);
+}
+
+.cta-links .text-link {
+  color: var(--teal);
+  border-bottom: 1px solid transparent;
+}
+
+.cta-links .text-link:hover {
+  border-bottom-color: var(--teal);
+}
+
+/* ---------- Latest release: platform blocks ---------- */
+.download-latest {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--soft);
+}
+
+.platforms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+.platform-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.platform-block h2 {
+  margin: 0;
+  font: 500 20px/1.2 var(--sans);
+  letter-spacing: -0.005em;
+}
+
+.asset-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.asset-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--teal);
+}
+
+.asset-link:hover {
+  color: var(--orange);
+}
+
+.asset-link__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.asset-link code {
+  font: 400 14px/1 var(--mono);
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+.asset-meta {
+  font: 400 12px/1 var(--mono);
+  color: var(--muted);
+}
+
+.asset-note {
+  font: 400 12px/1 var(--sans);
+  color: var(--sub);
+}
+
+.asset-sha {
+  font: 400 12px/1.5 var(--mono);
+}
+
+.asset-sha summary {
+  cursor: pointer;
+  color: var(--sub);
+  font: 400 12px/1 var(--mono);
+  user-select: none;
+  list-style: none;
+}
+
+.asset-sha summary::-webkit-details-marker {
+  display: none;
+}
+
+.asset-sha summary::before {
+  content: '▸ ';
+  color: var(--teal);
+}
+
+.asset-sha[open] summary::before {
+  content: '▾ ';
+}
+
+.asset-sha summary .hide {
+  display: none;
+}
+
+.asset-sha[open] summary .show {
+  display: none;
+}
+
+.asset-sha[open] summary .hide {
+  display: inline;
+}
+
+.asset-sha summary:hover {
+  color: var(--teal);
+}
+
+.asset-sha code {
+  display: block;
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--paper-deep);
+  border-radius: 3px;
+  font: 400 11px/1.4 var(--mono);
+  color: var(--muted);
+  word-break: break-all;
+}
+
+/* ---------- Install / Verify ---------- */
+.download-install {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--soft);
+}
+
+.download-install h2 {
+  margin: 0 0 24px;
+  font: 500 28px/1.2 var(--sans);
+  letter-spacing: -0.005em;
+}
+
+.install-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 800px) {
+  .install-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.install-block h3,
+.verify-block h3 {
+  margin: 0 0 12px;
+  font: 500 13px/1 var(--mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--sub);
+}
+
+.install-block pre,
+.verify-block pre {
+  margin: 0;
+  padding: 20px;
+  background: var(--navy);
+  color: var(--paper);
+  border-radius: 4px;
+  overflow-x: auto;
+  font: 400 13px/1.6 var(--mono);
+}
+
+.install-block pre code,
+.verify-block pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.install-block pre .comment {
+  color: var(--teal-light);
+  opacity: 0.7;
+}
+
+.verify-block p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ---------- Older releases ---------- */
+.download-older {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--soft);
+}
+
+.download-older h2 {
+  margin: 0 0 16px;
+  font: 500 28px/1.2 var(--sans);
+  letter-spacing: -0.005em;
+}
+
+.older-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ---------- Build from source ---------- */
+.download-source {
+  padding: 48px 0 0;
+}
+
+.download-source h2 {
+  margin: 0 0 16px;
+  font: 500 20px/1.2 var(--sans);
+  letter-spacing: -0.005em;
+}
+
+.download-source .text-link {
+  color: var(--teal);
+  border-bottom: 1px solid transparent;
+  font-size: 15px;
+}
+
+.download-source .text-link:hover {
+  border-bottom-color: var(--teal);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .download-hero h1 {
+    font-size: 36px;
+  }
+  .cta-button {
+    padding: 20px 24px;
+  }
+  .cta-button__label {
+    font-size: 18px;
+  }
+}
+</style>

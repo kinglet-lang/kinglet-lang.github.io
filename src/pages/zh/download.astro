@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import DownloadContent from '../../components/DownloadContent.astro';
+import { t } from '../../i18n';
+---
+<BaseLayout title={t('download.title', 'zh')} description={t('download.description', 'zh')}>
+<SiteHeader />
+<DownloadContent />
+<SiteFooter />
+</BaseLayout>
