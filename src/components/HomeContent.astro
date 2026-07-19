@@ -157,22 +157,33 @@ const previewLabel = t('editor.preview', locale);
       <div>
         <p class="section-number">{t('section.start.eyebrow', locale)}</p>
         <h2>{t('section.start.h2', locale)}</h2>
-        <p>{t('section.start.lead', locale)}</p>
       </div>
       <div class="install-block">
-        <div class="install-options">
-          <div class="install-option">
-            <div class="install-option__head">
-              <span>{t('download.install.unix', locale)}</span>
-              <button id="copy-unix" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button>
-            </div>
-            <div class="install-command"><span aria-hidden="true">$</span><code id="cmd-unix">curl -fsSL https://kinglet-lang.org/install.sh | sh</code></div>
+        <div class="install-console">
+          <div class="platform-tabs" role="tablist" aria-label={t('download.install.title', locale)}>
+            <button class="platform-tab" id="platform-linux" type="button" role="tab" aria-selected="true" aria-controls="install-linux" data-platform="linux">
+              <img src="/platform-icons/linux.svg" alt="" aria-hidden="true" />
+              <span>{t('download.platform.linux', locale)}</span>
+            </button>
+            <button class="platform-tab" id="platform-macos" type="button" role="tab" aria-selected="false" aria-controls="install-macos" data-platform="macos" tabindex="-1">
+              <img src="/platform-icons/apple.svg" alt="" aria-hidden="true" />
+              <span>{t('download.platform.macos', locale)}</span>
+            </button>
+            <button class="platform-tab" id="platform-windows" type="button" role="tab" aria-selected="false" aria-controls="install-windows" data-platform="windows" tabindex="-1">
+              <span class="platform-icon platform-icon--windows" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              <span>{t('download.platform.windows', locale)}</span>
+            </button>
           </div>
-          <div class="install-option">
-            <div class="install-option__head">
-              <span>{t('download.install.windows', locale)}</span>
-              <button id="copy-windows" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button>
-            </div>
+          <div class="install-panel" id="install-linux" role="tabpanel" aria-labelledby="platform-linux" data-platform-panel="linux">
+            <div class="install-panel__head"><span>sh</span><button id="copy-linux" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button></div>
+            <div class="install-command"><span aria-hidden="true">$</span><code id="cmd-linux">curl -fsSL https://kinglet-lang.org/install.sh | sh</code></div>
+          </div>
+          <div class="install-panel" id="install-macos" role="tabpanel" aria-labelledby="platform-macos" data-platform-panel="macos" hidden>
+            <div class="install-panel__head"><span>sh</span><button id="copy-macos" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button></div>
+            <div class="install-command"><span aria-hidden="true">$</span><code id="cmd-macos">curl -fsSL https://kinglet-lang.org/install.sh | sh</code></div>
+          </div>
+          <div class="install-panel" id="install-windows" role="tabpanel" aria-labelledby="platform-windows" data-platform-panel="windows" hidden>
+            <div class="install-panel__head"><span>pwsh</span><button id="copy-windows" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button></div>
             <div class="install-command"><span aria-hidden="true">PS&gt;</span><code id="cmd-windows">irm https://kinglet-lang.org/install.ps1 | iex</code></div>
           </div>
         </div>
@@ -202,10 +213,38 @@ const previewLabel = t('editor.preview', locale);
       window.setTimeout(function () { label.textContent = copyText; }, 1400);
     });
   }
-  bindCopy('copy-unix', 'cmd-unix');
+  bindCopy('copy-linux', 'cmd-linux');
+  bindCopy('copy-macos', 'cmd-macos');
   bindCopy('copy-windows', 'cmd-windows');
   bindCopy('hero-copy', 'hero-code');
   bindCopy('code-copy', 'code-block');
+
+  var platformTabs = Array.prototype.slice.call(document.querySelectorAll('[data-platform]'));
+  var platformPanels = Array.prototype.slice.call(document.querySelectorAll('[data-platform-panel]'));
+  function selectPlatform(platform, focus) {
+    platformTabs.forEach(function (tab) {
+      var active = tab.dataset.platform === platform;
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.tabIndex = active ? 0 : -1;
+      if (active && focus) tab.focus();
+    });
+    platformPanels.forEach(function (panel) {
+      panel.hidden = panel.dataset.platformPanel !== platform;
+    });
+  }
+  platformTabs.forEach(function (tab, index) {
+    tab.addEventListener('click', function () { selectPlatform(tab.dataset.platform, false); });
+    tab.addEventListener('keydown', function (event) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      var offset = event.key === 'ArrowRight' ? 1 : -1;
+      var next = platformTabs[(index + offset + platformTabs.length) % platformTabs.length];
+      selectPlatform(next.dataset.platform, true);
+    });
+  });
+  var ua = navigator.userAgent || '';
+  var detectedPlatform = /Windows/i.test(ua) ? 'windows' : (/Mac OS X|Macintosh/i.test(ua) ? 'macos' : 'linux');
+  selectPlatform(detectedPlatform, false);
 
   var sources = { hero: document.getElementById('hero-code'), code: document.getElementById('code-block') };
   document.querySelectorAll('[data-run]').forEach(function (btn) {

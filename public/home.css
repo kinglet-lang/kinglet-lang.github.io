@@ -585,27 +585,66 @@ html[lang="zh"] .hero h1 em { font-style: normal; }
 /* --- get started: one command --- */
 .get-started { background: var(--paper); border-top: 1px solid var(--ink); }
 .start-grid { padding-block: 112px; display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 72px; align-items: start; }
-.start-grid > div:first-child p:last-child { margin-top: 20px; color: var(--muted); max-width: 40ch; font-size: 17px; line-height: 1.55; }
 .install-block { align-self: start; min-width: 0; }
-.install-options {
+.install-console { min-width: 0; }
+.platform-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--ink);
+  border-bottom: 0;
+}
+.platform-tab {
+  min-width: 0;
+  min-height: 54px;
+  padding: 10px 14px;
+  border: 0;
+  border-right: 1px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.platform-tab:last-child { border-right: 0; }
+.platform-tab:hover { color: var(--ink); background: rgba(1, 98, 138, 0.06); }
+.platform-tab[aria-selected="true"] { color: var(--paper); background: var(--ink); }
+.platform-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.platform-tab img,
+.platform-icon { width: 19px; height: 19px; flex: 0 0 19px; }
+.platform-tab img { display: block; }
+.platform-tab[aria-selected="true"] img { filter: brightness(0) invert(1); }
+.platform-icon--windows {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1.5px;
+  transform: skewY(-4deg);
+}
+.platform-icon--windows i { display: block; background: currentColor; }
+.install-panel {
   border: 1px solid var(--ink);
   background: var(--ink);
 }
-.install-option + .install-option { border-top: 1px solid rgba(251, 246, 234, 0.16); }
-.install-option__head {
+.install-panel__head {
   min-height: 38px;
   padding: 0 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  border-bottom: 1px solid rgba(251, 246, 234, 0.16);
   background: rgba(251, 246, 234, 0.06);
   color: rgba(251, 246, 234, 0.62);
   font: 500 10.5px/1 var(--mono);
   letter-spacing: var(--tracking-mono);
   text-transform: uppercase;
 }
-.install-option__head button {
+.install-panel__head button {
   border: 0;
   padding: 6px 0;
   background: none;
@@ -615,7 +654,7 @@ html[lang="zh"] .hero h1 em { font-style: normal; }
   text-transform: inherit;
   cursor: pointer;
 }
-.install-option__head button:hover { color: var(--accent); }
+.install-panel__head button:hover { color: var(--accent); }
 .install-command {
   min-height: 58px; padding: 17px 18px;
   display: flex; align-items: baseline; gap: 14px;
@@ -714,7 +753,15 @@ html[lang="zh"] .hero h1 em { font-style: normal; }
   .hero-editor__head { height: 32px; padding: 0 14px; font-size: 10.5px; }
   .section-grid, .compiler .section-grid { padding-block: 72px; }
   .code-grid, .start-grid { padding-block: 72px; }
-  .install-option__head { padding-inline: 16px; }
+  .platform-tab {
+    min-height: 50px;
+    padding-inline: 8px;
+    gap: 7px;
+    font-size: 10px;
+  }
+  .platform-tab img,
+  .platform-icon { width: 17px; height: 17px; flex-basis: 17px; }
+  .install-panel__head { padding-inline: 16px; }
   .install-command {
     min-height: 0;
     padding: 15px 16px 17px;

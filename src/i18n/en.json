@@ -58,7 +58,6 @@
 
   "section.start.eyebrow": "Get started",
   "section.start.h2": "Install the toolchain and build your first program.",
-  "section.start.lead": "The installer works on macOS and Linux. Windows is supported through PowerShell.",
   "start.link.guide": "Read the guide →",
   "start.link.build": "Build from source →",
 
