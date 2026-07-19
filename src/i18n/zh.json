@@ -59,7 +59,6 @@
   "section.start.eyebrow": "开始使用",
   "section.start.h2": "安装 Kinglet 工具链并构建首个程序。",
   "section.start.lead": "macOS 与 Linux 可直接运行安装脚本；Windows 使用 PowerShell 完成安装。",
-  "start.windows.note": "Windows PowerShell：",
   "start.link.guide": "阅读语言指南 →",
   "start.link.build": "从源码构建 →",
 

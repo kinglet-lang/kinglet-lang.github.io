@@ -587,9 +587,37 @@ html[lang="zh"] .hero h1 em { font-style: normal; }
 .start-grid { padding-block: 112px; display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 72px; align-items: start; }
 .start-grid > div:first-child p:last-child { margin-top: 20px; color: var(--muted); max-width: 40ch; font-size: 17px; line-height: 1.55; }
 .install-block { align-self: start; min-width: 0; }
-.platform-tabs { display: none; }
+.install-options {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+}
+.install-option + .install-option { border-top: 1px solid rgba(251, 246, 234, 0.16); }
+.install-option__head {
+  min-height: 38px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: rgba(251, 246, 234, 0.06);
+  color: rgba(251, 246, 234, 0.62);
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+}
+.install-option__head button {
+  border: 0;
+  padding: 6px 0;
+  background: none;
+  color: rgba(251, 246, 234, 0.52);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.install-option__head button:hover { color: var(--accent); }
 .install-command {
-  min-height: 56px; padding: 18px 20px;
+  min-height: 58px; padding: 17px 18px;
   display: flex; align-items: baseline; gap: 14px;
   background: var(--ink); color: var(--paper);
   position: relative;
@@ -607,22 +635,6 @@ html[lang="zh"] .hero h1 em { font-style: normal; }
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
 }
 .install-command code::-webkit-scrollbar { display: none; }
-.install-command button {
-  border: 0; background: none;
-  color: rgba(251, 246, 234, 0.55);
-  font: 500 11px/1 var(--mono);
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.install-command button:hover { color: var(--paper); }
-.install-note {
-  margin-top: 14px;
-  color: var(--muted);
-  font: 400 13.5px/1.55 var(--mono);
-}
-.install-note code { color: var(--ink); background: transparent; padding: 0; font-weight: 500; }
 .start-links { margin-top: 26px; display: flex; gap: 28px; flex-wrap: wrap; }
 .start-links a {
   color: var(--teal);
@@ -702,6 +714,22 @@ html[lang="zh"] .hero h1 em { font-style: normal; }
   .hero-editor__head { height: 32px; padding: 0 14px; font-size: 10.5px; }
   .section-grid, .compiler .section-grid { padding-block: 72px; }
   .code-grid, .start-grid { padding-block: 72px; }
+  .install-option__head { padding-inline: 16px; }
+  .install-command {
+    min-height: 0;
+    padding: 15px 16px 17px;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .install-command code {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    mask-image: none;
+    -webkit-mask-image: none;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
   .feature-list article, .project-links a { grid-template-columns: 1fr; gap: 6px; }
   .pipeline { grid-template-columns: 1fr 1fr; }
   .pipeline > div { border-right: 0; border-bottom: 1px solid var(--soft); }

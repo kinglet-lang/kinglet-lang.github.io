@@ -160,8 +160,22 @@ const previewLabel = t('editor.preview', locale);
         <p>{t('section.start.lead', locale)}</p>
       </div>
       <div class="install-block">
-        <div class="install-command"><span id="prompt">$</span><code id="cmd">curl -fsSL https://kinglet-lang.org/install.sh | sh</code><button id="copy" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span id="copy-label">{copyLabel}</span></button></div>
-        <p class="install-note">{t('start.windows.note', locale)} <code>irm https://kinglet-lang.org/install.ps1 | iex</code></p>
+        <div class="install-options">
+          <div class="install-option">
+            <div class="install-option__head">
+              <span>{t('download.install.unix', locale)}</span>
+              <button id="copy-unix" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button>
+            </div>
+            <div class="install-command"><span aria-hidden="true">$</span><code id="cmd-unix">curl -fsSL https://kinglet-lang.org/install.sh | sh</code></div>
+          </div>
+          <div class="install-option">
+            <div class="install-option__head">
+              <span>{t('download.install.windows', locale)}</span>
+              <button id="copy-windows" type="button" data-label-copy={copyLabel} data-label-copied={t('editor.copied', locale)}><span>{copyLabel}</span></button>
+            </div>
+            <div class="install-command"><span aria-hidden="true">PS&gt;</span><code id="cmd-windows">irm https://kinglet-lang.org/install.ps1 | iex</code></div>
+          </div>
+        </div>
         <div class="start-links">
           <a href={docsHref}>{t('start.link.guide', locale)}</a>
           <a href="https://github.com/kinglet-lang/bootstrap">{t('start.link.build', locale)}</a>
@@ -188,7 +202,8 @@ const previewLabel = t('editor.preview', locale);
       window.setTimeout(function () { label.textContent = copyText; }, 1400);
     });
   }
-  bindCopy('copy', 'cmd');
+  bindCopy('copy-unix', 'cmd-unix');
+  bindCopy('copy-windows', 'cmd-windows');
   bindCopy('hero-copy', 'hero-code');
   bindCopy('code-copy', 'code-block');
 
