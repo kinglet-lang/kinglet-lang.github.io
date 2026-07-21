@@ -3,8 +3,12 @@ import { t, defaultLocale, type Locale } from '../i18n';
 import releases from '../data/releases.json';
 
 const locale = (Astro.currentLocale ?? defaultLocale) as Locale;
-const current = releases.releases[0];
+const current = releases.releases.find((release) => release.tag === releases.current);
+if (!current) throw new Error(`Current release ${releases.current} is missing from releases.json`);
 const assetBase = `https://github.com/kinglet-lang/bootstrap/releases/download/${current.tag}`;
+const localePrefix = locale === 'zh' ? '/zh' : '';
+const releaseNotesPath = `${localePrefix}/releases/${current.tag}/`;
+const releasesPath = `${localePrefix}/releases/`;
 
 // Platform metadata for rendering order and labels.
 const platforms = [
@@ -40,9 +44,9 @@ const defaultAsset = current.assets[defaultPlatform];
         <div class="cta-links">
           <a href="#platforms" class="text-link">{t('download.cta.other', locale)}</a>
           <span class="sep" aria-hidden="true">·</span>
-          <a href={current.releaseNotesUrl} class="text-link">{t('download.cta.releaseNotes', locale)}</a>
+          <a href={releaseNotesPath} class="text-link">{t('download.cta.releaseNotes', locale)}</a>
           <span class="sep" aria-hidden="true">·</span>
-          <a href="https://github.com/kinglet-lang/bootstrap/releases" class="text-link">{t('download.cta.allReleases', locale)}</a>
+          <a href={releasesPath} class="text-link">{t('download.cta.allReleases', locale)}</a>
         </div>
       </div>
     </div>
@@ -87,7 +91,6 @@ const defaultAsset = current.assets[defaultPlatform];
         <div class="install-block">
           <h3>{t('download.install.unix', locale)}</h3>
           <pre><code>$ tar xzf kinglet-*.tar.gz
-$ cd kinglet-*
 $ sudo cp -r bin lib /usr/local/
 
 <span class="comment"># {t('download.install.pathHint', locale)}</span>
@@ -97,8 +100,6 @@ $ export PATH="$PWD/bin:$PATH"</code></pre>
         <div class="install-block">
           <h3>{t('download.install.windows', locale)}</h3>
           <pre><code>PS&gt; tar xzf kinglet-windows-x64.tar.gz
-PS&gt; cd kinglet-windows-x64
-
 <span class="comment"># {t('download.install.pathHint', locale)}</span>
 PS&gt; $env:Path += ";$PWD\bin"</code></pre>
         </div>

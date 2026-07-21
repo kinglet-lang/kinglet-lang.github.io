@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import ReleasesIndexContent from '../../components/ReleasesIndexContent.astro';
+import { t } from '../../i18n';
+
+const entries = await getCollection('releases');
+---
+<BaseLayout title={t('releases.metaTitle', 'en')} description={t('releases.metaDescription', 'en')}>
+  <SiteHeader />
+  <ReleasesIndexContent entries={entries} locale="en" />
+  <SiteFooter />
+</BaseLayout>

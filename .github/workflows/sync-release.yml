@@ -1,0 +1,52 @@
+name: Sync release notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published bootstrap release tag (for example v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Sync published release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/sync-release.mjs --tag "${{ inputs.tag }}"
+
+      - run: pnpm build
+
+      - name: Create sync pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: content/sync-${{ inputs.tag }}
+          delete-branch: true
+          commit-message: "content(release): sync Kinglet ${{ inputs.tag }}"
+          title: "content(release): sync Kinglet ${{ inputs.tag }}"
+          body: |
+            **Summary**
+
+            Synchronize the published Kinglet `${{ inputs.tag }}` release metadata and canonical English release notes from `kinglet-lang/bootstrap`.
+
+            **Testing**
+
+            - `node scripts/sync-release.mjs --tag ${{ inputs.tag }}`
+            - `pnpm build`

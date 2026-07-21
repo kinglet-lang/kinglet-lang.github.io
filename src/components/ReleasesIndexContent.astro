@@ -1,0 +1,78 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import releasesData from '../data/releases.json';
+import { t, type Locale } from '../i18n';
+
+interface Props {
+  entries: CollectionEntry<'releases'>[];
+  locale: Locale;
+}
+
+const { entries, locale } = Astro.props;
+const localeCode = locale === 'zh' ? 'zh-CN' : 'en';
+const prefix = locale === 'zh' ? '/zh' : '';
+const formatDate = (date: Date) => date.toLocaleDateString(localeCode, {
+  year: 'numeric',
+  month: locale === 'zh' ? 'long' : 'short',
+  day: '2-digit',
+  timeZone: 'UTC',
+});
+const byTagAndLocale = new Map(entries.map((entry) => [`${entry.data.tag}:${entry.data.locale}`, entry]));
+const cards = releasesData.releases.map((release) => {
+  const entry = byTagAndLocale.get(`${release.tag}:${locale}`)
+    ?? byTagAndLocale.get(`${release.tag}:en`);
+  return { release, entry };
+});
+---
+<main class="releases-page">
+  <header class="subpage-hero releases-hero">
+    <div class="shell subpage-hero__grid">
+      <div>
+        <p class="eyebrow">{t('releases.eyebrow', locale)}</p>
+        <h1>{t('releases.title', locale)}</h1>
+      </div>
+      <p>{t('releases.lead', locale)}</p>
+    </div>
+  </header>
+
+  <section class="shell releases-list" aria-label={t('releases.listLabel', locale)}>
+    {cards.map(({ release, entry }) => (
+      <article class="release-card">
+        <div class="release-card__meta">
+          <span class="release-card__version">{release.tag}</span>
+          <span class="release-badge">{entry?.data.channel === 'prerelease' ? t('releases.prerelease', locale) : t('releases.stable', locale)}</span>
+          <time datetime={`${release.date}T00:00:00.000Z`}>{formatDate(new Date(`${release.date}T00:00:00Z`))}</time>
+        </div>
+        <div class="release-card__body">
+          <h2>{entry?.data.title ?? `Kinglet ${release.tag}`}</h2>
+          {entry?.data.description && <p>{entry.data.description}</p>}
+          <div class="release-card__actions">
+            <a href={`${prefix}/releases/${release.tag}/`}>{t('releases.read', locale)}</a>
+            <a href={`${prefix}/download/`}>{t('releases.download', locale)}</a>
+          </div>
+        </div>
+      </article>
+    ))}
+    {cards.length === 0 && <p class="empty-state">{t('releases.empty', locale)}</p>}
+  </section>
+</main>
+
+<style>
+.releases-hero { background: var(--paper-deep); }
+.releases-hero .subpage-hero__grid > p { max-width: 500px; color: var(--muted); font-size: 18px; }
+.releases-list { padding-block: 64px 110px; }
+.release-card { display: grid; grid-template-columns: 230px minmax(0, 760px); gap: 64px; padding: 38px 0; border-top: 1px solid var(--line); }
+.release-card:last-child { border-bottom: 1px solid var(--line); }
+.release-card__meta { display: flex; flex-wrap: wrap; align-content: start; align-items: center; gap: 10px; }
+.release-card__version { width: 100%; color: var(--ink); font: 500 22px/1 var(--mono); }
+.release-card__meta time { width: 100%; color: var(--sub); font: 400 11px/1.5 var(--mono); }
+.release-badge { padding: 5px 8px; border: 1px solid var(--teal); color: var(--teal); font: 500 9px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.release-card__body h2 { font-size: 30px; font-weight: 500; line-height: 1.15; }
+.release-card__body p { margin-top: 12px; color: var(--muted); font-size: 16px; }
+.release-card__actions { display: flex; gap: 24px; margin-top: 22px; }
+.release-card__actions a { color: var(--teal); font-size: 14px; border-bottom: 1px solid transparent; }
+.release-card__actions a:hover { border-bottom-color: var(--teal); }
+@media (max-width: 760px) {
+  .release-card { grid-template-columns: 1fr; gap: 22px; }
+}
+</style>

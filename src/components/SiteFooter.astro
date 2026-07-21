@@ -25,7 +25,7 @@ const homePrefix = locale === 'zh' ? '/zh' : '';
         <h4>{t('footer.project', locale)}</h4>
         <ul>
           <li><a href="https://github.com/kinglet-lang/bootstrap">{t('footer.project.compiler', locale)}</a></li>
-          <li><a href="https://github.com/kinglet-lang/bootstrap/releases">{t('footer.project.releases', locale)}</a></li>
+          <li><a href={`${homePrefix}/releases`}>{t('footer.project.releases', locale)}</a></li>
         </ul>
       </div>
       <div class="footer-col">

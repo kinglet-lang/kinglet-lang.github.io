@@ -39,4 +39,20 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { news, docs, blog };
+const releases = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/releases' }),
+  schema: z.object({
+    version: z.string(),
+    tag: z.string(),
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    locale: z.enum(['en', 'zh']),
+    channel: z.enum(['stable', 'prerelease']).default('stable'),
+    githubReleaseUrl: z.string().url(),
+    sourceUrl: z.string().url(),
+    sourceSha256: z.string().regex(/^[0-9a-f]{64}$/),
+  }),
+});
+
+export const collections = { news, docs, blog, releases };
