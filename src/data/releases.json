@@ -4,26 +4,26 @@
     {
       "version": "0.1.0",
       "tag": "v0.1.0",
-      "date": "2026-07-19",
+      "date": "2026-07-21",
       "githubReleaseUrl": "https://github.com/kinglet-lang/bootstrap/releases/tag/v0.1.0",
       "releaseNotesUrl": "https://github.com/kinglet-lang/bootstrap/releases/tag/v0.1.0",
       "assets": {
         "windows-x64": {
           "file": "kinglet-windows-x64.tar.gz",
-          "size": "13 MB",
-          "sha256": "placeholder-windows-x64",
+          "size": "14.9 MB",
+          "sha256": "dbdc4763721c417e9ab9df7cdefd0a958eb1bb25ed1eb268b1de2ee749576226",
           "note": "Windows 10+"
         },
         "macos-arm64": {
           "file": "kinglet-macos-arm64.tar.gz",
-          "size": "11 MB",
-          "sha256": "placeholder-macos-arm64",
+          "size": "11.4 MB",
+          "sha256": "013659279b04cd385f98ad4f364d82660193c0c83b045c11d5553ef3b481b1ea",
           "note": "Apple Silicon"
         },
         "linux-x64": {
           "file": "kinglet-linux-x64.tar.gz",
-          "size": "12 MB",
-          "sha256": "placeholder-linux-x64",
+          "size": "11.8 MB",
+          "sha256": "3f1cd8cfbfce6e98a5ebde7f220eea04e7f70b09d8740fa25299de7532f87f84",
           "note": "glibc 2.31+"
         }
       }
