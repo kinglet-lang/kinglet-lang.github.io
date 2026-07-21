@@ -8,6 +8,7 @@
     "dev": "astro dev --host --port 8000",
     "build": "astro build",
     "preview": "astro preview --host --port 8000",
+    "sync:release": "node scripts/sync-release.mjs",
     "astro": "astro"
   },
   "dependencies": {

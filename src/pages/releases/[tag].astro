@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import ReleaseNoteContent from '../../components/ReleaseNoteContent.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('releases', ({ data }) => data.locale === 'en');
+  return entries.map((entry) => ({ params: { tag: entry.data.tag }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+---
+<BaseLayout title={`${entry.data.title} — Kinglet Releases`} description={entry.data.description}>
+  <SiteHeader />
+  <ReleaseNoteContent entry={entry} locale="en" />
+  <SiteFooter />
+</BaseLayout>

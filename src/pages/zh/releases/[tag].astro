@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SiteHeader from '../../../components/SiteHeader.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
+import ReleaseNoteContent from '../../../components/ReleaseNoteContent.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('releases');
+  const english = entries.filter((entry) => entry.data.locale === 'en');
+  return english.map((fallbackEntry) => {
+    const translated = entries.find((entry) => entry.data.tag === fallbackEntry.data.tag && entry.data.locale === 'zh');
+    return {
+      params: { tag: fallbackEntry.data.tag },
+      props: { entry: translated ?? fallbackEntry, fallback: !translated },
+    };
+  });
+}
+
+const { entry, fallback } = Astro.props;
+---
+<BaseLayout title={`${entry.data.title} — Kinglet 发布说明`} description={entry.data.description}>
+  <SiteHeader />
+  <ReleaseNoteContent entry={entry} locale="zh" fallback={fallback} />
+  <SiteFooter />
+</BaseLayout>

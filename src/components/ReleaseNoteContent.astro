@@ -1,0 +1,121 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import releasesData from '../data/releases.json';
+import { t, type Locale } from '../i18n';
+
+interface Props {
+  entry: CollectionEntry<'releases'>;
+  locale: Locale;
+  fallback?: boolean;
+}
+
+const { entry, locale, fallback = false } = Astro.props;
+const { Content, headings } = await render(entry);
+const release = releasesData.releases.find((candidate) => candidate.tag === entry.data.tag);
+const prefix = locale === 'zh' ? '/zh' : '';
+const localeCode = locale === 'zh' ? 'zh-CN' : 'en';
+const date = entry.data.pubDate.toLocaleDateString(localeCode, {
+  year: 'numeric',
+  month: 'long',
+  day: '2-digit',
+  timeZone: 'UTC',
+});
+const toc = headings.filter((heading) => heading.depth === 2);
+---
+<main class="release-page">
+  <header class="release-hero">
+    <div class="shell release-hero__grid">
+      <div class="release-hero__meta">
+        <a href={`${prefix}/releases/`}>← {t('release.back', locale)}</a>
+        <span class="release-badge">{entry.data.channel === 'prerelease' ? t('releases.prerelease', locale) : t('releases.stable', locale)}</span>
+        <time datetime={entry.data.pubDate.toISOString()}>{date}</time>
+      </div>
+      <div>
+        <p class="eyebrow">{t('release.eyebrow', locale)}</p>
+        <h1>{entry.data.title}</h1>
+        <p class="release-hero__description">{entry.data.description}</p>
+        <div class="release-hero__actions">
+          <a class="release-primary" href={`${prefix}/download/`}>{t('release.download', locale)}</a>
+          <a href={entry.data.githubReleaseUrl}>{t('release.github', locale)} ↗</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {fallback && (
+    <aside class="translation-notice">
+      <div class="shell">
+        <p>{t('release.englishFallback', locale)} <a href={`/releases/${entry.data.tag}/`}>{t('release.viewEnglish', locale)} →</a></p>
+      </div>
+    </aside>
+  )}
+
+  <div class="shell release-reader">
+    <aside class="release-toc">
+      <a class="release-toc__home" href={`${prefix}/releases/`}>{t('release.all', locale)}</a>
+      {toc.length > 0 && (
+        <nav aria-label={t('release.onThisPage', locale)}>
+          <h2>{t('release.onThisPage', locale)}</h2>
+          <ol>{toc.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+        </nav>
+      )}
+    </aside>
+
+    <article class="release-article">
+      <div class="prose"><Content /></div>
+      <footer class="release-source">
+        <p>{t('release.canonicalSource', locale)}</p>
+        <a href={entry.data.sourceUrl}>{t('release.viewSource', locale)} ↗</a>
+        {release && <a href={`${release.githubReleaseUrl}#assets`}>{t('release.assets', locale)} ↗</a>}
+      </footer>
+    </article>
+  </div>
+</main>
+
+<style>
+.release-hero { padding-block: 76px; background: var(--ink); color: var(--paper); }
+.release-hero__grid { display: grid; grid-template-columns: 190px minmax(0, 780px); gap: 48px; }
+.release-hero__meta { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.release-hero__meta > a { color: rgba(251, 246, 234, .65); font-size: 13px; }
+.release-hero__meta time { color: rgba(251, 246, 234, .55); font: 500 11px/1.5 var(--mono); }
+.release-badge { padding: 5px 8px; border: 1px solid var(--teal-light); color: var(--teal-light); font: 500 9px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.release-hero .eyebrow { color: var(--teal-light); }
+.release-hero h1 { margin-top: 16px; font-size: clamp(42px, 5vw, 64px); font-weight: 500; line-height: 1.05; letter-spacing: -.03em; }
+.release-hero__description { margin-top: 20px; max-width: 700px; color: rgba(251, 246, 234, .68); font-size: 18px; }
+.release-hero__actions { display: flex; align-items: center; gap: 24px; margin-top: 30px; font-size: 14px; }
+.release-hero__actions a { color: var(--paper); }
+.release-hero__actions .release-primary { padding: 11px 16px; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.translation-notice { border-bottom: 1px solid var(--line); background: var(--paper-deep); }
+.translation-notice .shell { padding-block: 16px; }
+.translation-notice p { color: var(--muted); font-size: 14px; }
+.translation-notice a { color: var(--teal); }
+.release-reader { padding-block: 64px 110px; display: grid; grid-template-columns: 220px minmax(0, 780px); gap: 72px; align-items: start; }
+.release-toc { position: sticky; top: 28px; }
+.release-toc__home { display: block; padding-bottom: 18px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 13px; font-weight: 500; }
+.release-toc nav { margin-top: 26px; }
+.release-toc h2 { color: var(--faint); font: 500 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.release-toc ol { margin: 15px 0 0; padding: 0; list-style: none; }
+.release-toc li + li { margin-top: 9px; }
+.release-toc li a { color: var(--muted); font-size: 13px; line-height: 1.35; }
+.release-toc li a:hover { color: var(--teal); }
+.release-article { min-width: 0; }
+.release-article .prose { margin-top: 0; max-width: 100%; overflow-wrap: anywhere; }
+.release-article :global(.prose > p:first-child) { margin-top: 0; font-size: 18px; }
+.release-article :global(.prose table) { display: block; max-width: 100%; margin-block: 20px; overflow-x: auto; border-collapse: collapse; }
+.release-article :global(.prose th), .release-article :global(.prose td) { padding: 9px 13px; border: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.release-article :global(.prose blockquote) { margin: 20px 0; padding: 2px 0 2px 20px; border-left: 3px solid var(--teal); color: var(--muted); }
+.release-source { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; }
+.release-source p { width: 100%; color: var(--sub); }
+.release-source a { color: var(--teal); }
+@media (max-width: 820px) {
+  .release-hero__grid, .release-reader { grid-template-columns: 1fr; gap: 38px; }
+  .release-hero__meta { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .release-toc { position: static; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .release-toc nav { display: none; }
+}
+@media (max-width: 560px) {
+  .release-hero { padding-block: 52px; }
+  .release-hero h1 { font-size: 40px; }
+  .release-reader { padding-block: 40px 80px; }
+}
+</style>
